@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+
+<!-- ✅ Modo APP / Fullscreen no celular -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2b7bba">
+
+<!-- ✅ PWA -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" sizes="192x192" href="ícone/ícone-192.png">
+<link rel="apple-touch-icon" href="ícone/ícone-192.png">
+
+<title>Pedidos</title>
+
+<style>
+/* Base */
+html, body {
+  height: 100%; margin:0; padding:0; overflow-x:hidden;
+  overscroll-behavior-y: none; background:#f7f7f7;
+  font-family: Arial, sans-serif; text-align:center;
+}
+@supports (-webkit-touch-callout: none) { body { height: -webkit-fill-available; } }
+
+/* Topo */
+header {
+  background:#2b7bba; color:white; padding:10px;
+  font-size:18px; font-weight:bold; position:sticky; top:0; z-index:10;
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+}
+#versao {
+  background:#ffcc00; color:#000; font-weight:bold; padding:4px 8px;
+  border-radius:8px; font-size:13px; border:1px solid #333;
+  display:none;
+}
+#total {font-size:15px; font-weight:bold;}
+.logo-wrap{display:flex; align-items:center; gap:8px;}
+.logo-wrap img{height:38px; width:auto;}
+
+/* Marcas */
+#marcas-container {
+  display:flex; flex-wrap:wrap; justify-content:center;
+  gap:10px; margin:10px;
+}
+.marca-btn {
+  flex: 1 1 120px; min-width: 130px; max-width: 160px; padding:10px;
+  border:none; border-radius:10px; font-size:14px; background:#2b7bba; color:white;
+  cursor:pointer; word-wrap:break-word; white-space:normal;
+}
+.marca-btn.tudo {background:#25d366; font-weight:bold;}
+
+/* Telefone */
+#telefone-container {
+  margin:15px auto 0;
+  display:flex; justify-content:center; align-items:center;
+  gap:8px; flex-wrap:wrap;
+}
+#telefone-container span {font-weight:bold; color:#333;}
+#telefone-container button {
+  border:none; background:#2b7bba; color:white;
+  border-radius:8px; padding:6px 10px; cursor:pointer;
+}
+
+/* Produtos */
+#produtos-container {
+  display:grid; 
+  grid-template-columns:repeat(2,1fr);
+  gap:12px; 
+  padding:12px; 
+  max-width:700px; 
+  margin:auto;
+  padding-bottom: 90px;
+}
+.produto {
+  background:white; border-radius:12px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+  padding:10px;
+}
+/* CARD DE PROMOÇÃO */
+.promo-card {
+  background: #fff3c4 !important; /* amarelo claro */
+  border: 2px solid #ffcc00 !important;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+.produto img {
+  width:100%; height:160px;
+  object-fit:contain; border-radius:10px; background:#fff;
+}
+.produto h4{ margin:5px 0 0; }
+.produto small{ display:block; margin-bottom:4px; }
+.produto p{ margin:4px 0; }
+
+/* Qtd */
+.qtd-container {
+  display:flex; align-items:center; justify-content:center; margin-top:5px;
+}
+.qtd-container button {
+  width:28px; height:28px; border:none; border-radius:6px;
+  background:#2b7bba; color:white; font-size:18px; font-weight:bold; cursor:pointer;
+}
+.qtd-container input {
+  width:40px; text-align:center; margin:0 5px;
+  border:1px solid #ccc; border-radius:6px;
+}
+
+/* Botões topo direito */
+button#voltar {
+  background:#e74c3c; color:white; border:none;
+  padding:8px 12px; font-size:14px; border-radius:8px; cursor:pointer;
+}
+#btnCarrinho, #btnEnviarPedido {
+  background:white; color:#2b7bba; border:2px solid #2b7bba;
+  font-size:16px; padding:10px 18px; border-radius:10px;
+  font-weight:bold; cursor:pointer;
+}
+#btnEnviarPedido {
+  display:none; background:#25d366; color:white; border:none;
+}
+
+/* Carrinho */
+#tela-carrinho { padding:15px; }
+.carrinho-item {
+  background:white; border-radius:10px; margin:8px auto; padding:10px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1); max-width:700px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.carrinho-item img {
+  width:60px; height:60px; border-radius:8px; object-fit:contain;
+}
+
+/* Popup telefone */
+.hidden {display:none;}
+#popup {
+  position:fixed; inset:0; background:rgba(0,0,0,0.6);
+  display:none; justify-content:center; align-items:center; z-index:100;
+}
+#popup-content {
+  background:white; padding:20px; border-radius:10px;
+  max-width:300px; text-align:center;
+}
+#popup input {
+  width:90%; padding:6px; margin-top:8px;
+  border:1px solid #ccc; border-radius:6px; text-align:center;
+}
+#popup button {
+  margin-top:10px; background:#2b7bba; color:white;
+  border:none; border-radius:8px; padding:8px 12px; cursor:pointer;
+}
+
+/* Splash */
+#splash {
+  position: fixed; inset: 0; background: #2b7bba;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+#splash img { width: 180px; height:auto; }
+</style>
+</head>
+<body>
+
+<!-- Splash -->
+<div id="splash">
+  <img src="ativo/logo.svg" alt="Master Distribuidora">
+</div>
+
+<header>
+  <div class="logo-wrap">
+    <img src="ativo/logo.svg" alt="Master Distribuidora">
+    <span id="versao">v2.1</span>
+  </div>
+  <button id="voltar" onclick="mostrarMarcas()">🔙 Marcas</button>
+  <div>Pedidos OnLine<br><span id="total">Total: R$ 0,00</span></div>
+  <button id="btnCarrinho" onclick="mostrarCarrinho()">🛒 Carrinho</button>
+  <button id="btnEnviarPedido" onclick="enviarWhatsApp()">📩 Enviar Pedido</button>
+</header>
+
+<!-- TELA 1: MARCAS -->
+<div id="tela-marcas">
+
+  <div id="telefone-container"></div>
+
+  <button onclick="exibirUltimoPedido()" 
+          style="margin:10px auto; background:#ffcc00; color:#000;
+                 border:none; padding:8px 12px; font-size:15px;
+                 font-weight:bold; border-radius:8px; cursor:pointer;">
+      📦 Ver Último Pedido
+  </button>
+
+  <h3>Escolha uma Marca</h3>
+
+  <div id="marcas-container">
+    <button class="marca-btn tudo" onclick="mostrarProdutos('Tudo')">Tudo</button>
+    <button class="marca-btn" onclick="mostrarProdutos('Bauducco')">Bauducco</button>
+    <button class="marca-btn" onclick="mostrarProdutos('Danone')">Danone</button>
+    <button class="marca-btn" onclick="mostrarProdutos('Divinitos')">Divinitos</button>
+    <button class="marca-btn" onclick="mostrarProdutos('Elma Chips')">Elma Chips</button>
+    <button class="marca-btn" onclick="mostrarProdutos('FRITOP')">FRITOP</button>
+    <button class="marca-btn" onclick="mostrarProdutos('Frutap')">Frutap</button>
+    <button class="marca-btn" onclick="mostrarProdutos('Kremoso')">Kremoso</button>
+    <button class="marca-btn" onclick="mostrarProdutos('Nestlé')">Nestlé</button>
+    <button class="marca-btn" onclick="mostrarProdutos('Oz')">Oz Pipocas</button>
+    <button class="marca-btn" onclick="mostrarProdutos('Rebeka')">Rebeka Pudim</button>
+    <button class="marca-btn" onclick="mostrarProdutos('Rei da Massa')">Rei da Massa</button>
+    <button class="marca-btn" onclick="mostrarProdutos('Sacola')">Sacolas</button>
+  </div>
+
+  <!-- BOTÃO PROMOÇÕES -->
+  <div style="width:100%; text-align:center; margin-top:12px;">
+      <button class="marca-btn" style="background:#ff7c1a;" onclick="mostrarPromocoes()">
+          🧡 Promoções
+      </button>
+  </div>
+
+</div>
+
+<!-- POPUP -->
+<div id="popup">
+  <div id="popup-content">
+    <h4>Informe seu número de contato</h4>
+    <input id="telefone-input" placeholder="(19) 99999-9999" maxlength="15" inputmode="numeric">
+    <button id="btnSalvarContato">Salvar contato</button>
+  </div>
+</div>
+
+<!-- TELA 2 PRODUTOS -->
+<div id="tela-produtos" class="hidden">
+  <h3 id="titulo-marca"></h3>
+  <div id="produtos-container"></div>
+</div>
+
+<!-- TELA 3 CARRINHO -->
+<div id="tela-carrinho" class="hidden">
+  <button onclick="exibirUltimoPedido()"
+          style="margin:10px auto; background:#ffcc00; color:#000;
+                 border:none; padding:8px 12px; font-size:15px;
+                 font-weight:bold; border-radius:8px; cursor:pointer;">
+      📦 Ver Último Pedido
+  </button>
+
+  <h3>🛍️ Meu Carrinho</h3>
+
+  <div id="itens-carrinho"></div>
+  <h3 id="total-carrinho">Total: R$ 0,00</h3>
+  <p id="data-ultimo-pedido" style="margin-top:4px;font-size:13px;color:#555;"></p>
+</div>
+
+<!-- MODAL QTD -->
+<div id="modalQtd" style="
+  position:fixed; inset:0; background:rgba(0,0,0,0.6);
+  display:none; justify-content:center; align-items:center; z-index:9999;">
+  <div style="background:white;padding:20px;border-radius:10px;text-align:center;width:220px;">
+    <h4>Quantidade</h4>
+    <input id="modalQtdInput" type="number"
+           style="width:80%;padding:6px;font-size:18px;text-align:center;margin-top:10px;">
+    <button onclick="confirmarQtdManual()"
+            style="margin-top:12px;background:#2b7bba;color:white;border:none;border-radius:8px;padding:8px 16px;">
+      OK
+    </button>
+  </div>
+</div>
+
+<script>
+/* --- SERVICE WORKER + SPLASH --- */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+window.addEventListener('load', ()=>{
+  setTimeout(()=>document.getElementById('splash').style.display='none',400);
+});
+
+/* --- VARIÁVEIS --- */
+let produtos=[], produtosCarregados=false;
+let carrinho={};
+let telefoneDigits=localStorage.getItem("telefone_digits")||"";
+let telefoneDisplay=localStorage.getItem("telefone_display")||"";
+const STORAGE_ULTIMO="ultimo_pedido";
+
+/* --- NORMALIZAR --- */
+function normalizarMarca(str){
+  return str?String(str).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim():"";
+}
+
+/* --- MARCAS FIXAS --- */
+const MARCAS_FIXAS=[
+  "Bauducco","Danone","Divinitos","Elma Chips","FRITOP",
+  "Frutap","Kremoso","Nestlé","Oz","Rebeka","Rei da Massa","Sacola"
+];
+
+/* --- CARREGAR JSON --- */
+fetch('produtos.json')
+  .then(r=>r.json())
+  .then(data=>{
+    produtos=data||[];
+    produtosCarregados=true;
+  })
+  .catch(()=>{
+    produtos=[];
+    produtosCarregados=true;
+  });
+
+/* --- MOSTRAR PRODUTOS DE UMA MARCA --- */
+function mostrarProdutos(marca) {
+
+  if (!produtosCarregados) {
+    alert("Produtos ainda carregando, tente novamente.");
+    return;
+  }
+
+  document.getElementById("tela-marcas").classList.add("hidden");
+  document.getElementById("tela-carrinho").classList.add("hidden");
+  document.getElementById("tela-produtos").classList.remove("hidden");
+  document.getElementById("btnCarrinho").style.display = "inline-block";
+  document.getElementById("btnEnviarPedido").style.display = "none";
+
+  const container = document.getElementById("produtos-container");
+  container.innerHTML = "";
+  document.getElementById("titulo-marca").textContent = marca;
+
+  let lista = [];
+
+  if (marca === "Tudo") {
+      // 👉 Exibe TODOS os produtos
+      lista = produtos;
+  } else {
+      const mNorm = normalizarMarca(marca);
+      lista = produtos.filter(p => normalizarMarca(p.marca) === mNorm);
+  }
+
+  if (lista.length === 0) {
+    container.innerHTML = `
+      <div class="produto" style="grid-column:1/-1; padding:25px;">
+        <h4 style="margin-bottom:10px;">Sem produtos dessa marca</h4>
+        <img src="ativo/SemEstoque.png"
+             style="width:140px; height:140px; object-fit:contain; margin:auto;">
+      </div>
+    `;
+    return;
+  }
+
+  lista.forEach(prod => {
+
+    const cod = String(prod.Código).trim();
+    const img = prod.imagem && prod.imagem.trim() !== ""
+      ? prod.imagem
+      : "https://i.imgur.com/jzjHhHG.png";
+
+    const valorCx = Number(prod.valor) || 0;
+    const un = Number(prod.unidades) || 1;
+    const valorUn = un ? valorCx / un : valorCx;
+
+    /* --- CARD PROMOÇÃO + AMARELO --- */
+    container.innerHTML += `
+      <div class="produto" 
+           style="position:relative; ${prod.promo ? 'background:#fff7b1; border:2px solid #ffd900;' : ''}">
+
+        ${prod.promo ? `
+          <div style="
+            position:absolute;
+            top:6px;
+            left:6px;
+            background:#ffd900;
+            color:#000;
+            padding:3px 6px;
+            border-radius:4px;
+            font-size:12px;
+            font-weight:bold;
+            box-shadow:0 0 4px rgba(0,0,0,0.3);
+          ">Promoção</div>
+        ` : ''}
+
+        <img src="${img}">
+        <h4>${prod.descricao}</h4>
+
+         ${prod.Validade ? `
+            <p style="
+                margin:6px 0; 
+                font-size:13px;
+                background:#ffe34d;
+                padding:3px 5px;
+                border-radius:5px;
+                color:#7a4a00;
+              ">
+              <b>Validade:</b> ${new Date(prod.Validade + "T00:00:00").toLocaleDateString("pt-BR")}
+            </p>
+          ` : ``}
+
+        <small><b>Qt Cx: ${un} · (${cod})</b></small>
+        <p><b>UN R$ ${valorUn.toFixed(2)} · Cx R$ ${valorCx.toFixed(2)}</b></p>
+
+        <div class="qtd-container">
+          <button onclick="cliqueRapido('${cod}',-1,false)">-</button>
+          <input id="qtd-${cod}" value="${carrinho[cod]?.qtd || 0}">
+          <button onclick="cliqueRapido('${cod}',1,false)">+</button>
+        </div>
+
+      </div>`;
+  });
+}
+
+/* --- PROMOÇÕES (agora usando prod.promo === true) --- */
+function mostrarPromocoes(){
+  if (!produtosCarregados) {
+    alert("Produtos ainda carregando, tente novamente.");
+    return;
+  }
+
+  document.getElementById("tela-marcas").classList.add("hidden");
+  document.getElementById("tela-carrinho").classList.add("hidden");
+  document.getElementById("tela-produtos").classList.remove("hidden");
+  document.getElementById("btnCarrinho").style.display = "inline-block";
+  document.getElementById("btnEnviarPedido").style.display = "none";
+
+  const container = document.getElementById("produtos-container");
+  container.innerHTML = "";
+  document.getElementById("titulo-marca").textContent = "Promoções";
+
+  const listaPromo = produtos.filter(p => p.promo === true);
+
+  if (listaPromo.length === 0) {
+    container.innerHTML = `
+      <div class="produto promo-card" style="grid-column:1/-1; padding:25px;">
+        <h4 style="margin-bottom:10px;">Nenhuma promoção disponível no momento</h4>
+        <img src="ativo/SemEstoque.png"
+             style="width:140px; height:140px; object-fit:contain; margin:auto;">
+      </div>`;
+    return;
+  }
+
+  listaPromo.forEach(prod => {
+
+    const cod = String(prod.Código).trim();
+    const img = prod.imagem && prod.imagem.trim() !== ""
+      ? prod.imagem
+      : "https://i.imgur.com/jzjHhHG.png";
+
+    const valorCx = Number(prod.valor) || 0;
+    const unidadesCx = Number(prod.unidades) || 1;
+    const valorUn = unidadesCx ? valorCx / unidadesCx : valorCx;
+
+    const dt = prod.Validade ? new Date(prod.Validade + "T00:00:00") : null;
+
+    container.innerHTML += `
+      <div class="produto promo-card" style="position:relative;">
+
+        <div style="
+            position:absolute; top:6px; left:6px;
+            background:#ffd900; color:#000;
+            padding:3px 6px; border-radius:4px;
+            font-size:12px; font-weight:bold;
+            box-shadow:0 0 4px rgba(0,0,0,0.3);
+        ">Promoção</div>
+
+        <img src="${img}">
+        <h4>${prod.descricao}</h4>
+
+        ${prod.Validade ? `
+          <p style="
+              margin:6px 0; 
+              font-size:13px;
+              background:#ffe34d;
+              padding:3px 5px;
+              border-radius:5px;
+              color:#7a4a00;
+            ">
+            <b>Validade:</b> ${dt.toLocaleDateString("pt-BR")}
+          </p>
+        ` : ``}
+
+        <small><b>Qt Cx: ${unidadesCx} · (${cod})</b></small>
+        <p><b>UN R$ ${valorUn.toFixed(2)} · Cx R$ ${valorCx.toFixed(2)}</b></p>
+
+        <div class="qtd-container">
+          <button onclick="cliqueRapido('${cod}', -1, false)">-</button>
+          <input id="qtd-${cod}" value="${carrinho[cod]?.qtd || 0}">
+          <button onclick="cliqueRapido('${cod}', 1, false)">+</button>
+        </div>
+      </div>`;
+  });
+}
+
+/* --------------------------------------------- */
+/* TELEFONE – idêntico ao seu (não modificado)  */
+/* --------------------------------------------- */
+
+document.addEventListener("input", e=>{
+  if(e.target.id==="telefone-input"){
+    let v=e.target.value.replace(/\D/g,"");
+    if(v.length>11) v=v.slice(0,11);
+    if(v.length>=7) e.target.value=`(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
+    else if(v.length>2) e.target.value=`(${v.slice(0,2)}) ${v.slice(2)}`;
+    else e.target.value=v;
+  }
+});
+
+function renderTelefone(){
+  const el=document.getElementById("telefone-container");
+  el.innerHTML=telefoneDigits
+    ? `<span>${telefoneDisplay}</span><button onclick="editarTelefone()">✏️ Editar</button>`
+    : `<span style="color:#666;">Nenhum contato cadastrado</span> <button onclick="abrirPopup()">Cadastrar</button>`;
+}
+function abrirPopup(){document.getElementById("popup").style.display="flex";}
+function fecharPopup(){document.getElementById("popup").style.display="none";}
+function salvarTelefone(){
+  const inp=document.getElementById("telefone-input");
+  const digits=inp.value.replace(/\D/g,"");
+  if(digits.length<10){alert("Número inválido!");return;}
+
+  const ddd=digits.slice(0,2);
+  const corpo=digits.slice(2);
+  const exib=corpo.length===8
+    ? `(${ddd}) ${corpo.slice(0,4)}-${corpo.slice(4)}`
+    : `(${ddd}) ${corpo.slice(0,5)}-${corpo.slice(5)}`;
+
+  telefoneDigits=digits;
+  telefoneDisplay=exib;
+  localStorage.setItem("telefone_digits",digits);
+  localStorage.setItem("telefone_display",exib);
+  fecharPopup();
+  renderTelefone();
+}
+function editarTelefone(){
+  localStorage.removeItem("telefone_digits");
+  localStorage.removeItem("telefone_display");
+  telefoneDigits=""; telefoneDisplay="";
+  abrirPopup();
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("btnSalvarContato").addEventListener("click",salvarTelefone);
+  renderTelefone();
+  if(!telefoneDigits) abrirPopup();
+});
+
+/* --------------------------------------------- */
+/* CARRINHO + TOTAL + WHATSAPP – igual ao seu   */
+/* --------------------------------------------- */
+
+function mostrarMarcas(){
+  document.getElementById("tela-produtos").classList.add("hidden");
+  document.getElementById("tela-carrinho").classList.add("hidden");
+  document.getElementById("tela-marcas").classList.remove("hidden");
+
+  document.getElementById("btnCarrinho").style.display="inline-block";
+  document.getElementById("btnEnviarPedido").style.display="none";
+}
+
+function mostrarCarrinho(){
+  document.getElementById("tela-marcas").classList.add("hidden");
+  document.getElementById("tela-produtos").classList.add("hidden");
+  document.getElementById("tela-carrinho").classList.remove("hidden");
+
+  document.getElementById("btnCarrinho").style.display="none";
+  document.getElementById("btnEnviarPedido").style.display="inline-block";
+
+  const cont=document.getElementById("itens-carrinho");
+  cont.innerHTML="";
+
+  if(Object.keys(carrinho).length===0){
+    cont.innerHTML="<p>Seu carrinho está vazio 🛒</p>";
+    document.getElementById("total-carrinho").textContent="Total: R$ 0,00";
+    document.getElementById("data-ultimo-pedido").textContent="";
+    return;
+  }
+
+  for(const c in carrinho){
+    const p=carrinho[c];
+    const valorCx=Number(p.valor)||0;
+    const un=Number(p.unidades)||1;
+
+    cont.innerHTML+=`
+      <div class="carrinho-item">
+        <img src="${p.imagem}">
+        <div style="flex:1;text-align:left;">
+          <b>${p.descricao}</b><br>
+          <small>Qt Cx: ${un} · (${p.Código})</small><br>
+          <span>UN R$ ${(valorCx/un).toFixed(2)} · Cx R$ ${valorCx.toFixed(2)}</span>
+        </div>
+
+        <div class="qtd-container">
+          <button onclick="cliqueRapido('${p.Código}',-1,true)">-</button>
+          <input id="qtd-carrinho-${p.Código}" value="${p.qtd}">
+          <button onclick="cliqueRapido('${p.Código}',1,true)">+</button>
+        </div>
+      </div>`;
+  }
+
+  atualizarTotal();
+}
+
+function alterarQtd(cod,delta,dentroCarrinho=false){
+  const prod=produtos.find(p=>p.Código===cod);
+  if(!prod) return;
+
+  const atual=carrinho[cod]?.qtd||0;
+  let nova=atual+delta;
+  if(nova<0) nova=0;
+
+  const valorCx=Number(prod.valor)||0;
+  const un=Number(prod.unidades)||1;
+
+  if(nova>0){
+    carrinho[cod]={...prod,valor:valorCx,unidades:un,qtd:nova};
+  }else delete carrinho[cod];
+
+  const i1=document.getElementById(`qtd-${cod}`);
+  const i2=document.getElementById(`qtd-carrinho-${cod}`);
+  if(i1) i1.value=nova;
+  if(i2) i2.value=nova;
+
+  atualizarTotal();
+}
+
+function cliqueRapido(cod,delta,dentro){
+  alterarQtd(cod,delta,dentro);
+}
+
+function atualizarTotal(){
+  let total=0;
+  for(const c in carrinho){
+    total+=carrinho[c].valor*carrinho[c].qtd;
+  }
+
+  document.getElementById("total").textContent="Total: R$ "+total.toFixed(2);
+  const t=document.getElementById("total-carrinho");
+  if(t) t.textContent="Total: R$ "+total.toFixed(2);
+}
+
+/* --- ENVIAR WHATSAPP --- */
+
+function enviarWhatsApp(){
+  if(!telefoneDigits){
+    alert("Cadastre um contato primeiro.");
+    abrirPopup();
+    return;
+  }
+  if(Object.keys(carrinho).length===0){
+    alert("Seu carrinho está vazio.");
+    return;
+  }
+
+  let total=0;
+  let linhas=[];
+
+  for(const cod in carrinho){
+    const p=carrinho[cod];
+    const valorCx=Number(p.valor)||0;
+    const un=Number(p.unidades)||1;
+    const valorUn=valorCx/un;
+    total+=valorCx*p.qtd;
+
+    linhas.push(
+      `${p.descricao}\n`+
+      `Qt Cx: ${un} . (${p.Código})\n`+
+      `UN R$ ${valorUn.toFixed(2)}  . Cx R$ ${valorCx.toFixed(2)}\n`+
+      `Qtd Pedida: ${p.qtd} Cx\n`
+    );
+  }
+
+  const ddd=telefoneDigits.slice(0,2);
+  const resto=telefoneDigits.slice(2);
+
+  const msg=
+    `Contato: ${ddd}-${resto}\n`+
+    `PEDIDO ONLINE\n\n`+
+    linhas.join("\n")+
+    `\nTOTAL: R$ ${total.toFixed(2)}`;
+
+  const ultimo={
+    data:new Date().toISOString(),
+    itens:carrinho,
+    total:total,
+    telefoneDigits:telefoneDigits
+  };
+  localStorage.setItem(STORAGE_ULTIMO,JSON.stringify(ultimo));
+
+  const url=`https://wa.me/55${telefoneDigits}?text=${encodeURIComponent(msg)}`;
+  window.open(url,"_blank");
+}
+
+/* --- ÚLTIMO PEDIDO --- */
+
+function exibirUltimoPedido(){
+  const raw=localStorage.getItem(STORAGE_ULTIMO);
+  if(!raw){alert("Nenhum pedido anterior.");return;}
+
+  try{
+    const ult=JSON.parse(raw);
+    if(!ult.itens){alert("Nenhum pedido anterior.");return;}
+
+    carrinho={};
+    for(const c in ult.itens){
+      const p=ult.itens[c];
+      carrinho[c]={...p,qtd:Number(p.qtd)||0};
+    }
+
+    mostrarCarrinho();
+
+    const el=document.getElementById("data-ultimo-pedido");
+    if(el){
+      const dt=new Date(ult.data);
+      if(!isNaN(dt.getTime())){
+        el.textContent="Último pedido em: "+
+          dt.toLocaleString("pt-BR",{
+            day:"2-digit",month:"2-digit",year:"numeric",
+            hour:"2-digit",minute:"numeric"
+          });
+      }
+    }
+  }catch{
+    alert("Erro ao carregar último pedido.");
+  }
+}
+</script>
+</body>
+</html>
