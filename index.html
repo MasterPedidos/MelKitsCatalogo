@@ -11,9 +11,9 @@
 <meta name="theme-color" content="#ffb400">
 
 <!-- ✅ PWA -->
+<link rel="icon" href="icone/icon_96.png" type="image/png">
+<link rel="apple-touch-icon" href="icone/icon_180.png">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" sizes="192x192" href="ícone/ícone-192.png">
-<link rel="apple-touch-icon" href="ícone/ícone-192.png">
 
 <title>Catálogo Mel Kits</title>
 
@@ -271,7 +271,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
 }
 window.addEventListener('load', ()=>{
-  setTimeout(()=>document.getElementById('splash').style.display='none',400);
+  navigator.serviceWorker.register("./service-worker.js");
 });
 
 /* --- VARIÁVEIS --- */
@@ -719,5 +719,6 @@ function exibirUltimoPedido(){
 </script>
 </body>
 </html>
+
 
 
