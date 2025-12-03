@@ -274,8 +274,9 @@ button#voltar {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
 }
+
 window.addEventListener('load', ()=>{
-  navigator.serviceWorker.register("./service-worker.js");
+  setTimeout(()=>document.getElementById('splash').style.display='none',400);
 });
 
 /* --- VARIÁVEIS --- */
@@ -723,6 +724,7 @@ function exibirUltimoPedido(){
 </script>
 </body>
 </html>
+
 
 
 
