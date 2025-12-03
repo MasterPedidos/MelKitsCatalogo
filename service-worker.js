@@ -5,7 +5,7 @@ const urlsToCache = [
   "./painel.html",
   "./manifest.json",
   "./produtos.json",
-  "./icone/icon_192.png"
+  "./ícone/icon_192.png"
 ];
 
 // Instalação do SW
@@ -38,5 +38,6 @@ self.addEventListener("fetch", event => {
     })
   );
 });
+
 
 
