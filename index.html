@@ -364,7 +364,7 @@ function mostrarProdutos(marca) {
     // INÍCIO ALTERAÇÃO — FORMATAÇÃO PEDIDA
     let precoTexto = "";
 
-    if (prod.promo === true && promoValor > 0) {
+    if ((prod.promo === true || prod.promo === "true") && promoValor > 0) {
       precoTexto = `
         <p style="margin:4px 0; color:#b30000; font-weight:bold;">
           (${cod}) · 
@@ -708,5 +708,6 @@ function exibirUltimoPedido(){
 </script>
 </body>
 </html>
+
 
 
