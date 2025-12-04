@@ -422,7 +422,7 @@ function mostrarPromocoes(){
   container.innerHTML = "";
   document.getElementById("titulo-marca").textContent = "Promoções";
 
-  const listaPromo = produtos.filter(p => p.promo === true);
+  const listaPromo = produtos.filter(p => p.promo == true || p.promo == "true");
 
   if (listaPromo.length === 0) {
     container.innerHTML = `
@@ -708,6 +708,7 @@ function exibirUltimoPedido(){
 </script>
 </body>
 </html>
+
 
 
 
