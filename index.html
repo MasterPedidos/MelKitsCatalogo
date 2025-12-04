@@ -335,7 +335,6 @@ function mostrarProdutos(marca) {
   let lista = [];
 
   if (marca === "Tudo") {
-      // 👉 Exibe TODOS os produtos
       lista = produtos;
   } else {
       const mNorm = normalizarMarca(marca);
@@ -348,8 +347,7 @@ function mostrarProdutos(marca) {
         <h4 style="margin-bottom:10px;">Sem produtos dessa marca</h4>
         <img src="ativo/SemEstoque.png"
              style="width:140px; height:140px; object-fit:contain; margin:auto;">
-      </div>
-    `;
+      </div>`;
     return;
   }
 
@@ -361,49 +359,41 @@ function mostrarProdutos(marca) {
       : "https://i.imgur.com/jzjHhHG.png";
 
     const valorCx = Number(prod.valor) || 0;
-    const un = Number(prod.unidades) || 1;
-    const valorUn = un ? valorCx / un : valorCx;
+    const promoValor = Number(prod.valor_promo) || 0;
 
-    /* --- CARD PROMOÇÃO + AMARELO --- */
+    // INÍCIO ALTERAÇÃO — FORMATAÇÃO PEDIDA
+    let precoTexto = "";
+
+    if (prod.promo === true && promoValor > 0) {
+      precoTexto = `
+        <p style="margin:4px 0; color:#b30000; font-weight:bold;">
+          (${cod}) · 
+          <span style="text-decoration:line-through; color:#555;">R$ ${valorCx.toFixed(2)}</span> 
+          → R$ ${promoValor.toFixed(2)}
+        </p>`;
+    } else {
+      precoTexto = `
+        <p style="margin:4px 0; font-weight:bold;">
+          (${cod}) · Cx R$ ${valorCx.toFixed(2)}
+        </p>`;
+    }
+    // FIM ALTERAÇÃO
+
     container.innerHTML += `
       <div class="produto" 
            style="position:relative; ${prod.promo ? 'background:#fff7b1; border:2px solid #ffd900;' : ''}">
 
         ${prod.promo ? `
           <div style="
-            position:absolute;
-            top:6px;
-            left:6px;
-            background:#ffd900;
-            color:#000;
-            padding:3px 6px;
-            border-radius:4px;
-            font-size:12px;
-            font-weight:bold;
-            box-shadow:0 0 4px rgba(0,0,0,0.3);
-          ">Promoção</div>
-        ` : ''}
+            position:absolute; top:6px; left:6px;
+            background:#ffd900; color:#000; padding:3px 6px;
+            border-radius:4px; font-size:12px; font-weight:bold;
+            box-shadow:0 0 4px rgba(0,0,0,0.3);">Promoção</div>` : ``}
 
         <img src="${img}">
         <h4>${prod.descricao}</h4>
 
-         ${prod.Validade ? `
-            <p style="
-                margin:6px 0; 
-                font-size:13px;
-                background:#ffe34d;
-                padding:3px 5px;
-                border-radius:5px;
-                color:#7a4a00;
-              ">
-              <b>Validade:</b> ${new Date(prod.Validade + "T00:00:00").toLocaleDateString("pt-BR")}
-            </p>
-          ` : ``}
-
-        <!-- 🔥 Novo formato solicitado -->
-        <p style="margin:4px 0;">
-            <b>(${cod}) · Kit R$ ${valorCx.toFixed(2)}</b>
-        </p>
+        ${precoTexto}
 
         <div class="qtd-container">
           <button onclick="cliqueRapido('${cod}',-1,false)">-</button>
@@ -415,7 +405,7 @@ function mostrarProdutos(marca) {
   });
 }
 
-/* --- PROMOÇÕES (agora usando prod.promo === true) --- */
+/* --- PROMOÇÕES (prod.promo === true) --- */
 function mostrarPromocoes(){
   if (!produtosCarregados) {
     alert("Produtos ainda carregando, tente novamente.");
@@ -437,9 +427,8 @@ function mostrarPromocoes(){
   if (listaPromo.length === 0) {
     container.innerHTML = `
       <div class="produto promo-card" style="grid-column:1/-1; padding:25px;">
-        <h4 style="margin-bottom:10px;">Nenhuma promoção disponível no momento</h4>
-        <img src="ativo/SemEstoque.png"
-             style="width:140px; height:140px; object-fit:contain; margin:auto;">
+        <h4 style="margin-bottom:10px;">Nenhuma promoção disponível</h4>
+        <img src="ativo/SemEstoque.png" style="width:140px; height:140px; object-fit:contain; margin:auto;">
       </div>`;
     return;
   }
@@ -447,45 +436,33 @@ function mostrarPromocoes(){
   listaPromo.forEach(prod => {
 
     const cod = String(prod.codigo).trim();
-    const img = prod.imagem && prod.imagem.trim() !== ""
-      ? prod.imagem
-      : "https://i.imgur.com/jzjHhHG.png";
+    const img = prod.imagem && prod.imagem.trim() !== "" ? prod.imagem : "https://i.imgur.com/jzjHhHG.png";
 
     const valorCx = Number(prod.valor) || 0;
-    const unidadesCx = Number(prod.unidades) || 1;
-    const valorUn = unidadesCx ? valorCx / unidadesCx : valorCx;
+    const promoValor = Number(prod.valor_promo) || 0;
 
-    const dt = prod.Validade ? new Date(prod.Validade + "T00:00:00") : null;
+    // INÍCIO ALTERAÇÃO
+    const precoTexto = `
+      <p style="margin:4px 0; color:#b30000; font-weight:bold;">
+        (${cod}) · 
+        <span style="text-decoration:line-through; color:#555;">R$ ${valorCx.toFixed(2)}</span>
+        → R$ ${promoValor.toFixed(2)}
+      </p>`;
+    // FIM ALTERAÇÃO
 
     container.innerHTML += `
       <div class="produto promo-card" style="position:relative;">
 
         <div style="
             position:absolute; top:6px; left:6px;
-            background:#ffd900; color:#000;
-            padding:3px 6px; border-radius:4px;
-            font-size:12px; font-weight:bold;
-            box-shadow:0 0 4px rgba(0,0,0,0.3);
-        ">Promoção</div>
+            background:#ffd900; color:#000; padding:3px 6px;
+            border-radius:4px; font-size:12px; font-weight:bold;
+            box-shadow:0 0 4px rgba(0,0,0,0.3);">Promoção</div>
 
         <img src="${img}">
         <h4>${prod.descricao}</h4>
 
-        ${prod.Validade ? `
-          <p style="
-              margin:6px 0; 
-              font-size:13px;
-              background:#ffe34d;
-              padding:3px 5px;
-              border-radius:5px;
-              color:#7a4a00;
-            ">
-            <b>Validade:</b> ${dt.toLocaleDateString("pt-BR")}
-          </p>
-        ` : ``}
-
-        <small><b>Qt Cx: ${unidadesCx} · (${cod})</b></small>
-        <p><b>UN R$ ${valorUn.toFixed(2)} · Cx R$ ${valorCx.toFixed(2)}</b></p>
+        ${precoTexto}
 
         <div class="qtd-container">
           <button onclick="cliqueRapido('${cod}', -1, false)">-</button>
@@ -731,4 +708,5 @@ function exibirUltimoPedido(){
 </script>
 </body>
 </html>
+
 
