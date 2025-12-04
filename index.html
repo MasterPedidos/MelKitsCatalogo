@@ -360,6 +360,8 @@ function mostrarProdutos(marca) {
 
     const valorCx = Number(prod.valor) || 0;
     const promoValor = Number(prod.valor_promo) || 0;
+    const promoTipo = Number(prod.promo_tipo) || 1;
+    const qtdPromo = Number(prod.qtd_promo) || 0;
 
     /* ------------------------------------------
        MONTAGEM DO TEXTO DE PREÇO (NORMAL / PROMO)
@@ -368,17 +370,27 @@ function mostrarProdutos(marca) {
 
     if ((prod.promo === true || prod.promo === "true") && promoValor > 0) {
 
-      // MODELO DE PROMO 1 — PREÇO RISQUE E NOVO PREÇO
-      precoTexto = `
-        <p style="margin:4px 0; color:#b30000; font-weight:bold;">
-          (${cod}) · 
-          <span style="text-decoration:line-through; color:#555;">R$ ${valorCx.toFixed(2)}</span>
-          → R$ ${promoValor.toFixed(2)}
-        </p>`;
+      if (promoTipo === 2) {
+        /* --- MODELO DE PROMOÇÃO 2 --- */
+        precoTexto = `
+          <p style="margin:4px 0; font-weight:bold;">
+            (${cod}) · R$ ${valorCx.toFixed(2)}
+          </p>
+          <p style="margin:4px 0; color:#b30000; font-weight:bold;">
+            comprando ${qtdPromo} cxs → R$ ${promoValor.toFixed(2)}
+          </p>`;
+      } else {
+        /* --- MODELO DE PROMOÇÃO 1 (padrão) --- */
+        precoTexto = `
+          <p style="margin:4px 0; color:#b30000; font-weight:bold;">
+            (${cod}) · 
+            <span style="text-decoration:line-through; color:#555;">R$ ${valorCx.toFixed(2)}</span>
+            → R$ ${promoValor.toFixed(2)}
+          </p>`;
+      }
 
     } else {
-
-      // MODO NORMAL
+      /* --- MODO NORMAL --- */
       precoTexto = `
         <p style="margin:4px 0; font-weight:bold;">
           (${cod}) · Cx R$ ${valorCx.toFixed(2)}
@@ -717,6 +729,7 @@ function exibirUltimoPedido(){
 </script>
 </body>
 </html>
+
 
 
 
