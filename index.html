@@ -355,7 +355,7 @@ function mostrarProdutos(marca) {
 
   lista.forEach(prod => {
 
-    const cod = String(prod.Código).trim();
+    const cod = String(prod.codigo).trim();
     const img = prod.imagem && prod.imagem.trim() !== ""
       ? prod.imagem
       : "https://i.imgur.com/jzjHhHG.png";
@@ -444,7 +444,7 @@ function mostrarPromocoes(){
 
   listaPromo.forEach(prod => {
 
-    const cod = String(prod.Código).trim();
+    const cod = String(prod.codigo).trim();
     const img = prod.imagem && prod.imagem.trim() !== ""
       ? prod.imagem
       : "https://i.imgur.com/jzjHhHG.png";
@@ -588,14 +588,14 @@ function mostrarCarrinho(){
         <img src="${p.imagem}">
         <div style="flex:1;text-align:left;">
           <b>${p.descricao}</b><br>
-          <small>Qt Cx: ${un} · (${p.Código})</small><br>
+          <small>Qt Cx: ${un} · (${p.codigo})</small><br>
           <span>UN R$ ${(valorCx/un).toFixed(2)} · Cx R$ ${valorCx.toFixed(2)}</span>
         </div>
 
         <div class="qtd-container">
-          <button onclick="cliqueRapido('${p.Código}',-1,true)">-</button>
-          <input id="qtd-carrinho-${p.Código}" value="${p.qtd}">
-          <button onclick="cliqueRapido('${p.Código}',1,true)">+</button>
+          <button onclick="cliqueRapido('${p.codigo}',-1,true)">-</button>
+          <input id="qtd-carrinho-${p.codigo}" value="${p.qtd}">
+          <button onclick="cliqueRapido('${p.codigo}',1,true)">+</button>
         </div>
       </div>`;
   }
@@ -604,7 +604,7 @@ function mostrarCarrinho(){
 }
 
 function alterarQtd(cod,delta,dentroCarrinho=false){
-  const prod=produtos.find(p=>p.Código===cod);
+  const prod=produtos.find(p=>p.codigo===cod);
   if(!prod) return;
 
   const atual=carrinho[cod]?.qtd||0;
@@ -666,7 +666,7 @@ function enviarWhatsApp(){
 
     linhas.push(
       `${p.descricao}\n`+
-      `Qt Cx: ${un} . (${p.Código})\n`+
+      `Qt Cx: ${un} . (${p.codigo})\n`+
       `UN R$ ${valorUn.toFixed(2)}  . Cx R$ ${valorCx.toFixed(2)}\n`+
       `Qtd Pedida: ${p.qtd} Cx\n`
     );
@@ -729,6 +729,7 @@ function exibirUltimoPedido(){
 </script>
 </body>
 </html>
+
 
 
 
