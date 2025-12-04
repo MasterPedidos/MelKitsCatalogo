@@ -361,27 +361,36 @@ function mostrarProdutos(marca) {
     const valorCx = Number(prod.valor) || 0;
     const promoValor = Number(prod.valor_promo) || 0;
 
-    // INÍCIO ALTERAÇÃO — FORMATAÇÃO PEDIDA
+    /* ------------------------------------------
+       MONTAGEM DO TEXTO DE PREÇO (NORMAL / PROMO)
+       ------------------------------------------ */
     let precoTexto = "";
 
-    ${String(prod.promo) === "true" ? 'background:#fff7b1; border:2px solid #ffd900;' : ''} {
+    if ((prod.promo === true || prod.promo === "true") && promoValor > 0) {
+
+      // MODELO DE PROMO 1 — PREÇO RISQUE E NOVO PREÇO
       precoTexto = `
         <p style="margin:4px 0; color:#b30000; font-weight:bold;">
           (${cod}) · 
-          <span style="text-decoration:line-through; color:#555;">R$ ${valorCx.toFixed(2)}</span> 
+          <span style="text-decoration:line-through; color:#555;">R$ ${valorCx.toFixed(2)}</span>
           → R$ ${promoValor.toFixed(2)}
         </p>`;
+
     } else {
+
+      // MODO NORMAL
       precoTexto = `
         <p style="margin:4px 0; font-weight:bold;">
           (${cod}) · Cx R$ ${valorCx.toFixed(2)}
         </p>`;
     }
-    // FIM ALTERAÇÃO
 
+    /* ------------------------------------------
+       CARD DO PRODUTO
+       ------------------------------------------ */
     container.innerHTML += `
-      <div class="produto" 
-           style="position:relative; ${prod.promo ? 'background:#fff7b1; border:2px solid #ffd900;' : ''}">
+      <div class="produto"
+           style="position:relative; ${(prod.promo ? 'background:#fff7b1; border:2px solid #ffd900;' : '')}">
 
         ${prod.promo ? `
           <div style="
@@ -708,6 +717,7 @@ function exibirUltimoPedido(){
 </script>
 </body>
 </html>
+
 
 
 
