@@ -297,6 +297,8 @@ let telefoneDisplay = localStorage.getItem("telefone_display") || "";
 const STORAGE_ULTIMO = "ultimo_pedido";
 
 /* --- CONFIG PROMO GLOBAL (vem do config.json) --- */
+/* 🔥 CONTROLE DO ÚLTIMO PEDIDO */
+let carregandoUltimoPedido = false;
 let promoConfig = null;      // objeto da promo progressiva
 let codigosBrinde = [];      // lista de códigos de brindes (strings)
 
@@ -1024,6 +1026,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
