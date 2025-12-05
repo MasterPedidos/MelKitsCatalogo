@@ -968,28 +968,26 @@ function enviarWhatsApp(){
      🔥 REGRAS DE SEGURANÇA — NÃO ENVIAR BRINDE ERRADO
      ============================================================ */
 
+  const setBrindes = new Set(codigosBrinde);
+
   // 1) Se promoção estiver desativada → remover brinde imediatamente
   if (!promoConfig || !promoConfig.ativa) {
-    const setBrindes = new Set(codigosBrinde);
-    for (const c of setBrindes) {
-      delete carrinho[c];
-    }
+    for (const c of setBrindes) delete carrinho[c];
   }
 
-  // 2) Recalcula o brinde com as regras ATUAIS
+  // 2) Recalcular brinde com regras ATUAIS
   aplicarBrindeProgressivo();
 
-  // 3) Se não houver itens normais → remover brinde e bloquear envio
-  const setBrindes2 = new Set(codigosBrinde);
-  const itensNormais = Object.keys(carrinho).filter(c => !setBrindes2.has(c));
+  // 3) Verificar novamente produtos normais
+  const itensNormais = Object.keys(carrinho).filter(c => !setBrindes.has(c));
 
+  // ⚠️ 4) SE SÓ EXISTIR BRINDE → BLOQUEAR ENVIO
   if (itensNormais.length === 0) {
-    for (const c of setBrindes2) delete carrinho[c];
+    // remove qualquer brinde que tenha sobrado
+    for (const c of setBrindes) delete carrinho[c];
 
-    if (Object.keys(carrinho).length === 0){
-      alert("Seu pedido não contém itens suficientes para o brinde.");
-      return;
-    }
+    alert("Você não tem itens suficientes para ganhar o brinde.");
+    return;
   }
 
   /* ============================================================
@@ -1095,6 +1093,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
