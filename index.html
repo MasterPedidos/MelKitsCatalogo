@@ -705,6 +705,14 @@ function mostrarCarrinho(){
   // 1) SEMPRE recalcula o brinde ANTES de montar
   aplicarBrindeProgressivo();
 
+  // 🔥 Se progressiva estiver desativada, remove brindes na hora
+  if (!promoConfig || !promoConfig.ativa) {
+    const setBrindes = new Set(codigosBrinde);
+    for (const c of setBrindes) {
+      delete carrinho[c];
+    }
+  }
+ 
   document.getElementById("tela-marcas").classList.add("hidden");
   document.getElementById("tela-produtos").classList.add("hidden");
   document.getElementById("tela-regra-promo").classList.add("hidden");
@@ -981,6 +989,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
