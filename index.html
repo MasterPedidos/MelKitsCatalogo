@@ -860,7 +860,7 @@ function alterarQtd(cod, delta, dentroCarrinho=false){
     codigosBrinde.forEach(c => delete carrinho[c]);
   }
 
-  /* ============================================================
+/* ============================================================
        🔥 ATUALIZAÇÕES FINAIS
      ============================================================ */
 
@@ -943,22 +943,59 @@ document.addEventListener("DOMContentLoaded",()=>{
   if (!telefoneDigits) abrirPopup();
 });
 
-/* --- ENVIAR WHATSAPP --- */
-  
-// Garantir que o pedido siga as regras ATUAIS
-  if (!promoConfig || !promoConfig.ativa) {
-      const setBrindes = new Set(codigosBrinde);
-      for (const c of setBrindes) {
-          delete carrinho[c];
-      }
-  }
+/* --- SINCRONIZAR CARRINHO COM O QUE ESTÁ NA TELA --- */
+function sincronizarCarrinhoPelaTela(){
+  const novoCarrinho = {};
 
+  // Pega todos os inputs de quantidade (produtos e carrinho)
+  const inputs = document.querySelectorAll(
+    'input[id^="qtd-"], input[id^="qtd-carrinho-"]'
+  );
+
+  inputs.forEach(inp => {
+    const id = inp.id;
+    let cod = null;
+
+    if (id.startsWith('qtd-carrinho-')) {
+      cod = id.substring('qtd-carrinho-'.length);
+    } else if (id.startsWith('qtd-')) {
+      cod = id.substring('qtd-'.length);
+    }
+
+    if (!cod) return;
+
+    const qtd = Number(inp.value) || 0;
+    if (qtd <= 0) return;
+
+    const prod = produtos.find(p => String(p.codigo) === String(cod));
+    if (!prod) return;
+
+    const valorCx = Number(prod.valor) || 0;
+    const un      = Number(prod.unidades) || 1;
+
+    novoCarrinho[cod] = {
+      ...prod,
+      valor: valorCx,
+      unidades: un,
+      qtd: qtd
+    };
+  });
+
+  // Substitui o carrinho global pelo que está na tela
+  carrinho = novoCarrinho;
+}
+
+/* --- ENVIAR WHATSAPP --- */
 function enviarWhatsApp(){
   if (!telefoneDigits){
     alert("Cadastre um contato primeiro.");
     abrirPopup();
     return;
   }
+
+  // 🔥 Primeiro, sincroniza o carrinho com o que o usuário está vendo
+  sincronizarCarrinhoPelaTela();
+
   if (Object.keys(carrinho).length === 0){
     alert("Seu carrinho está vazio.");
     return;
@@ -968,26 +1005,37 @@ function enviarWhatsApp(){
      🔥 REGRAS DE SEGURANÇA — NÃO ENVIAR BRINDE ERRADO
      ============================================================ */
 
-  const setBrindes = new Set(codigosBrinde);
-
-  // 1) Se promoção estiver desativada → remover brinde imediatamente
+  // 1) Se promoção estiver desativada → remover qualquer brinde
   if (!promoConfig || !promoConfig.ativa) {
-    for (const c of setBrindes) delete carrinho[c];
+    const setBrindes = new Set(codigosBrinde.map(String));
+    for (const c in carrinho) {
+      if (setBrindes.has(String(c))) {
+        delete carrinho[c];
+      }
+    }
   }
 
-  // 2) Recalcular brinde com regras ATUAIS
+  // 2) Recalcula o brinde com as regras ATUAIS e com quantidades reais
   aplicarBrindeProgressivo();
 
-  // 3) Verificar novamente produtos normais
-  const itensNormais = Object.keys(carrinho).filter(c => !setBrindes.has(c));
+  // 3) Garante que NÃO exista pedido formado só por brinde
+  const setBrindes2 = new Set(codigosBrinde.map(String));
+  const itensNormais = Object.keys(carrinho).filter(
+    c => !setBrindes2.has(String(c))
+  );
 
-  // ⚠️ 4) SE SÓ EXISTIR BRINDE → BLOQUEAR ENVIO
   if (itensNormais.length === 0) {
-    // remove qualquer brinde que tenha sobrado
-    for (const c of setBrindes) delete carrinho[c];
+    // Remove qualquer brinde que tenha sobrado
+    for (const c in carrinho){
+      if (setBrindes2.has(String(c))) {
+        delete carrinho[c];
+      }
+    }
 
-    alert("Você não tem itens suficientes para ganhar o brinde.");
-    return;
+    if (Object.keys(carrinho).length === 0){
+      alert("Seu pedido não contém itens suficientes para o brinde.");
+      return;
+    }
   }
 
   /* ============================================================
@@ -1004,6 +1052,7 @@ function enviarWhatsApp(){
     const valorUn = un ? valorCx/un : valorCx;
 
     if (p.brinde === true){
+      // Mensagem especial para brinde
       linhas.push(
         `Brinde: ${p.descricao}\n`+
         `Qtd: ${p.qtd}\n`+
@@ -1056,18 +1105,23 @@ function exibirUltimoPedido(){
       return;
     }
 
+    // 🔥 Ativa modo especial → NÃO recalcular brinde agora
     carregandoUltimoPedido = true;
 
+    // Carrega o carrinho salvo
     carrinho = {};
     for (const c in ult.itens){
       const p = ult.itens[c];
       carrinho[c] = { ...p, qtd: Number(p.qtd) || 0 };
     }
 
+    // Mostra o carrinho com o brinde antigo exatamente como estava
     mostrarCarrinho();
 
+    // 🔥 Desativa modo especial → mudanças futuras recalculam o brinde
     carregandoUltimoPedido = false;
 
+    // Exibir data do pedido
     const el = document.getElementById("data-ultimo-pedido");
     if (el){
       const dt = new Date(ult.data);
@@ -1088,11 +1142,12 @@ function exibirUltimoPedido(){
 /* --- Modal de quantidade manual (não usado ainda) --- */
 function confirmarQtdManual(){
   document.getElementById("modalQtd").style.display = "none";
-}
+}  
 
 </script>
 </body>
 </html>
+
 
 
 
