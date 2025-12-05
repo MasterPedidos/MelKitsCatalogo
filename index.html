@@ -203,9 +203,19 @@ button#voltar {
       <!-- ✔ Botão TUDO (ATIVO) -->
       <button class="marca-btn tudo" onclick="mostrarProdutos('Tudo')">Tudo</button>
   
-      <!-- ❌ Botões ocultos (mantidos como referência)
-      <button class="marca-btn" onclick="mostrarProdutos('Danone')">Danone</button>
-      -->
+      <!-- ❌ Botões ocultos -->
+      <!-- <button class="marca-btn" onclick="mostrarProdutos('Bauducco')">Bauducco</button> -->
+      <!-- <button class="marca-btn" onclick="mostrarProdutos('Danone')">Danone</button> -->
+      <!-- <button class="marca-btn" onclick="mostrarProdutos('Divinitos')">Divinitos</button> -->
+      <!-- <button class="marca-btn" onclick="mostrarProdutos('Elma Chips')">Elma Chips</button> -->
+      <!-- <button class="marca-btn" onclick="mostrarProdutos('FRITOP')">FRITOP</button> -->
+      <!-- <button class="marca-btn" onclick="mostrarProdutos('Frutap')">Frutap</button> -->
+      <!-- <button class="marca-btn" onclick="mostrarProdutos('Kremoso')">Kremoso</button> -->
+      <!-- <button class="marca-btn" onclick="mostrarProdutos('Nestlé')">Nestlé</button> -->
+      <!-- <button class="marca-btn" onclick="mostrarProdutos('Oz')">Oz Pipocas</button> -->
+      <!-- <button class="marca-btn" onclick="mostrarProdutos('Rebeka')">Rebeka Pudim</button> -->
+      <!-- <button class="marca-btn" onclick="mostrarProdutos('Rei da Massa')">Rei da Massa</button> -->
+      <!-- <button class="marca-btn" onclick="mostrarProdutos('Sacola')">Sacolas</button> -->
   </div>
   
   <!-- ✔ Botão PROMOÇÕES (ATIVO) -->
@@ -215,16 +225,10 @@ button#voltar {
       </button>
   </div>
 
-  <!-- ✔ Botão REGRAS DA PROMOÇÃO PROGRESSIVA -->
-  <div style="width:100%; text-align:center; margin-top:8px;">
-      <button class="marca-btn" style="background:#2b7bba;" onclick="mostrarTelaPromo()">
-          📜 Regras da Promoção
-      </button>
-  </div>
 
 </div>
 
-<!-- POPUP TELEFONE -->
+<!-- POPUP -->
 <div id="popup">
   <div id="popup-content">
     <h4>Informe seu número de contato</h4>
@@ -255,14 +259,6 @@ button#voltar {
   <p id="data-ultimo-pedido" style="margin-top:4px;font-size:13px;color:#555;"></p>
 </div>
 
-<!-- TELA 4 – REGRAS DA PROMOÇÃO PROGRESSIVA -->
-<div id="tela-regra-promo" class="hidden" style="padding:15px;">
-  <h3>🎁 Promoção Progressiva</h3>
-  <div id="regras-promo-box"
-       style="max-width:700px;margin:10px auto;text-align:left;font-size:14px;line-height:1.4;">
-  </div>
-</div>
-
 <!-- MODAL QTD -->
 <div id="modalQtd" style="
   position:fixed; inset:0; background:rgba(0,0,0,0.6);
@@ -279,10 +275,7 @@ button#voltar {
 </div>
 
 <script>
-/* ============================================================
-   BLOCO 1 — SERVICE WORKER + VARIÁVEIS + promo.json
-   ============================================================ */
-
+/* --- SERVICE WORKER + SPLASH --- */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
 }
@@ -291,68 +284,35 @@ window.addEventListener('load', ()=>{
   setTimeout(()=>document.getElementById('splash').style.display='none',400);
 });
 
-/* --- VARIÁVEIS GERAIS --- */
-let produtos = [], produtosCarregados = false;
-let carrinho = {};
-let telefoneDigits = localStorage.getItem("telefone_digits") || "";
-let telefoneDisplay = localStorage.getItem("telefone_display") || "";
-const STORAGE_ULTIMO = "ultimo_pedido";
-
-/* --- CONFIG PROMO GLOBAL (promo.json) --- */
-let promoConfig = null;      // objeto da promo progressiva
-let codigosBrinde = [];      // lista de códigos de brindes (strings)
+/* --- VARIÁVEIS --- */
+let produtos=[], produtosCarregados=false;
+let carrinho={};
+let telefoneDigits=localStorage.getItem("telefone_digits")||"";
+let telefoneDisplay=localStorage.getItem("telefone_display")||"";
+const STORAGE_ULTIMO="ultimo_pedido";
 
 /* --- NORMALIZAR --- */
 function normalizarMarca(str){
-  return str
-    ? String(str).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim()
-    : "";
+  return str?String(str).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim():"";
 }
 
-/* --- MARCAS FIXAS (referência, hoje só Tudo está visível) --- */
-const MARCAS_FIXAS = [
+/* --- MARCAS FIXAS --- */
+const MARCAS_FIXAS=[
   "Bauducco","Danone","Divinitos","Elma Chips","FRITOP",
   "Frutap","Kremoso","Nestlé","Oz","Rebeka","Rei da Massa","Sacola"
 ];
 
-/* --- CARREGAR PRODUTOS.JSON --- */
+/* --- CARREGAR JSON --- */
 fetch('produtos.json')
-  .then(r => r.json())
-  .then(data => {
-    produtos = data || [];
-    produtosCarregados = true;
+  .then(r=>r.json())
+  .then(data=>{
+    produtos=data||[];
+    produtosCarregados=true;
   })
-  .catch(() => {
-    produtos = [];
-    produtosCarregados = true;
+  .catch(()=>{
+    produtos=[];
+    produtosCarregados=true;
   });
-
-/* --- CARREGAR PROMO.JSON (níveis de brinde) --- */
-function carregarPromocaoGlobal(){
-  fetch('promo.json')
-    .then(r => r.json())
-    .then(cfg => {
-      promoConfig = cfg || null;
-      codigosBrinde = [];
-      if (promoConfig && promoConfig.ativa && Array.isArray(promoConfig.niveis)) {
-        promoConfig.niveis.forEach(nv => {
-          if (nv && nv.codigo) {
-            codigosBrinde.push(String(nv.codigo));
-          }
-        });
-      }
-    })
-    .catch(() => {
-      promoConfig = null;
-      codigosBrinde = [];
-    });
-}
-
-carregarPromocaoGlobal();
-
-/* ============================================================
-   BLOCO 2 — LISTAGEM DE PRODUTOS + PROMO 1 / PROMO 2
-   ============================================================ */
 
 /* --- MOSTRAR PRODUTOS DE UMA MARCA --- */
 function mostrarProdutos(marca) {
@@ -365,7 +325,6 @@ function mostrarProdutos(marca) {
   document.getElementById("tela-marcas").classList.add("hidden");
   document.getElementById("tela-carrinho").classList.add("hidden");
   document.getElementById("tela-produtos").classList.remove("hidden");
-  document.getElementById("tela-regra-promo").classList.add("hidden");
   document.getElementById("btnCarrinho").style.display = "inline-block";
   document.getElementById("btnEnviarPedido").style.display = "none";
 
@@ -373,18 +332,14 @@ function mostrarProdutos(marca) {
   container.innerHTML = "";
   document.getElementById("titulo-marca").textContent = marca;
 
-  let listaBase = [];
+  let lista = [];
 
   if (marca === "Tudo") {
-    listaBase = produtos;
+      lista = produtos;
   } else {
-    const mNorm = normalizarMarca(marca);
-    listaBase = produtos.filter(p => normalizarMarca(p.marca) === mNorm);
+      const mNorm = normalizarMarca(marca);
+      lista = produtos.filter(p => normalizarMarca(p.marca) === mNorm);
   }
-
-  // 🔥 NUNCA mostrar produtos que são brindes progressivos
-  const setBrindes = new Set(codigosBrinde);
-  let lista = listaBase.filter(p => !setBrindes.has(String(p.codigo)));
 
   if (lista.length === 0) {
     container.innerHTML = `
@@ -405,8 +360,8 @@ function mostrarProdutos(marca) {
 
     const valorCx = Number(prod.valor) || 0;
     const promoValor = Number(prod.valor_promo) || 0;
-    const promoTipo = Number(prod.promo_tipo) || 1;   // 1 = preço riscado, 2 = por quantidade
-    const qtdPromo  = Number(prod.qtd_promo)  || 0;   // para tipo 2
+    const promoTipo = Number(prod.promo_tipo) || 1;
+    const qtdPromo = Number(prod.qtd_promo) || 0;
 
     /* ------------------------------------------
        MONTAGEM DO TEXTO DE PREÇO (NORMAL / PROMO)
@@ -415,12 +370,8 @@ function mostrarProdutos(marca) {
 
     if ((prod.promo === true || prod.promo === "true") && promoValor > 0) {
 
-      if (promoTipo === 2 && qtdPromo > 0) {
+      if (promoTipo === 2) {
         /* --- MODELO DE PROMOÇÃO 2 --- */
-        // (imagem)
-        // Descrição
-        // (código) · R$ 20,00
-        // comprando 5 cxs → R$ 15,00
         precoTexto = `
           <p style="margin:4px 0; font-weight:bold;">
             (${cod}) · R$ ${valorCx.toFixed(2)}
@@ -464,11 +415,13 @@ function mostrarProdutos(marca) {
         <h4>${prod.descricao}</h4>
 
         ${precoTexto}
+
         <div class="qtd-container">
           <button onclick="cliqueRapido('${cod}',-1,false)">-</button>
-          <input id="qtd-${cod}" type="text" value="${carrinho[cod]?.qtd || 0}" readonly>
+          <input id="qtd-${cod}" value="${carrinho[cod]?.qtd || 0}">
           <button onclick="cliqueRapido('${cod}',1,false)">+</button>
         </div>
+
       </div>`;
   });
 }
@@ -483,7 +436,6 @@ function mostrarPromocoes(){
   document.getElementById("tela-marcas").classList.add("hidden");
   document.getElementById("tela-carrinho").classList.add("hidden");
   document.getElementById("tela-produtos").classList.remove("hidden");
-  document.getElementById("tela-regra-promo").classList.add("hidden");
   document.getElementById("btnCarrinho").style.display = "inline-block";
   document.getElementById("btnEnviarPedido").style.display = "none";
 
@@ -491,10 +443,7 @@ function mostrarPromocoes(){
   container.innerHTML = "";
   document.getElementById("titulo-marca").textContent = "Promoções";
 
-  const setBrindes = new Set(codigosBrinde);
-  const listaPromo = produtos.filter(
-    p => (p.promo == true || p.promo == "true") && !setBrindes.has(String(p.codigo))
-  );
+  const listaPromo = produtos.filter(p => p.promo == true || p.promo == "true");
 
   if (listaPromo.length === 0) {
     container.innerHTML = `
@@ -513,12 +462,14 @@ function mostrarPromocoes(){
     const valorCx = Number(prod.valor) || 0;
     const promoValor = Number(prod.valor_promo) || 0;
 
+    // INÍCIO ALTERAÇÃO
     const precoTexto = `
       <p style="margin:4px 0; color:#b30000; font-weight:bold;">
         (${cod}) · 
         <span style="text-decoration:line-through; color:#555;">R$ ${valorCx.toFixed(2)}</span>
         → R$ ${promoValor.toFixed(2)}
       </p>`;
+    // FIM ALTERAÇÃO
 
     container.innerHTML += `
       <div class="produto promo-card" style="position:relative;">
@@ -533,118 +484,76 @@ function mostrarPromocoes(){
         <h4>${prod.descricao}</h4>
 
         ${precoTexto}
+
         <div class="qtd-container">
           <button onclick="cliqueRapido('${cod}', -1, false)">-</button>
-          <input id="qtd-${cod}" type="text" value="${carrinho[cod]?.qtd || 0}" readonly>
+          <input id="qtd-${cod}" value="${carrinho[cod]?.qtd || 0}">
           <button onclick="cliqueRapido('${cod}', 1, false)">+</button>
         </div>
       </div>`;
   });
 }
 
-/* ============================================================
-   BLOCO 3 — PROMO PROGRESSIVA (NÍVEIS) + CARRINHO
-   ============================================================ */
+/* --------------------------------------------- */
+/* TELEFONE – idêntico ao seu (não modificado)  */
+/* --------------------------------------------- */
 
-/* --- CALCULAR / APLICAR BRINDE PROGRESSIVO --- */
-function aplicarBrindeProgressivo(){
-
-  if (!promoConfig || !promoConfig.ativa || !Array.isArray(promoConfig.niveis)) {
-    // se não tiver promo ativa, remove eventual brinde antigo
-    if (codigosBrinde.length){
-      codigosBrinde.forEach(c => { if (carrinho[c]) delete carrinho[c]; });
-    }
-    return;
+document.addEventListener("input", e=>{
+  if(e.target.id==="telefone-input"){
+    let v=e.target.value.replace(/\D/g,"");
+    if(v.length>11) v=v.slice(0,11);
+    if(v.length>=7) e.target.value=`(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
+    else if(v.length>2) e.target.value=`(${v.slice(0,2)}) ${v.slice(2)}`;
+    else e.target.value=v;
   }
+});
 
-  const setBrindes = new Set(codigosBrinde);
+function renderTelefone(){
+  const el=document.getElementById("telefone-container");
+  el.innerHTML=telefoneDigits
+    ? `<span>${telefoneDisplay}</span><button onclick="editarTelefone()">✏️ Editar</button>`
+    : `<span style="color:#666;">Nenhum contato cadastrado</span> <button onclick="abrirPopup()">Cadastrar</button>`;
+}
+function abrirPopup(){document.getElementById("popup").style.display="flex";}
+function fecharPopup(){document.getElementById("popup").style.display="none";}
+function salvarTelefone(){
+  const inp=document.getElementById("telefone-input");
+  const digits=inp.value.replace(/\D/g,"");
+  if(digits.length<10){alert("Número inválido!");return;}
 
-  // 1) Soma total de caixas do pedido (IGNORANDO brindes)
-  let totalCaixas = 0;
-  for (const cod in carrinho){
-    if (!setBrindes.has(String(cod))){
-      totalCaixas += Number(carrinho[cod].qtd) || 0;
-    }
-  }
+  const ddd=digits.slice(0,2);
+  const corpo=digits.slice(2);
+  const exib=corpo.length===8
+    ? `(${ddd}) ${corpo.slice(0,4)}-${corpo.slice(4)}`
+    : `(${ddd}) ${corpo.slice(0,5)}-${corpo.slice(5)}`;
 
-  // 2) Encontra o nível MAIS ALTO atingido
-  let nivelEscolhido = null;
-  promoConfig.niveis
-    .filter(nv => nv && typeof nv.qtd === "number" && nv.qtd > 0 && nv.codigo)
-    .sort((a,b) => a.qtd - b.qtd)
-    .forEach(nv => {
-      if (totalCaixas >= nv.qtd){
-        nivelEscolhido = nv;
-      }
-    });
-
-  // 3) Remove QUALQUER brinde atual do carrinho
-  codigosBrinde.forEach(c => {
-    if (carrinho[c]) delete carrinho[c];
-  });
-
-  // 4) Se não atingiu nenhum nível → sai
-  if (!nivelEscolhido) return;
-
-  const codBrinde = String(nivelEscolhido.codigo);
-  const produtoBrinde = produtos.find(p => String(p.codigo).trim() === codBrinde);
-  if (!produtoBrinde) return;
-
-  // 5) Adiciona brinde (1 unidade, preço 0, não entra na soma)
-  carrinho[codBrinde] = {
-    ...produtoBrinde,
-    codigo: codBrinde,
-    qtd: 1,
-    valor: 0,
-    unidades: produtoBrinde.unidades ? Number(produtoBrinde.unidades) : 1,
-    brinde: true
-  };
+  telefoneDigits=digits;
+  telefoneDisplay=exib;
+  localStorage.setItem("telefone_digits",digits);
+  localStorage.setItem("telefone_display",exib);
+  fecharPopup();
+  renderTelefone();
+}
+function editarTelefone(){
+  localStorage.removeItem("telefone_digits");
+  localStorage.removeItem("telefone_display");
+  telefoneDigits=""; telefoneDisplay="";
+  abrirPopup();
 }
 
-/* --- TELA DE REGRAS DA PROMOÇÃO PROGRESSIVA --- */
-function mostrarTelaPromo(){
-  document.getElementById("tela-marcas").classList.add("hidden");
-  document.getElementById("tela-produtos").classList.add("hidden");
-  document.getElementById("tela-carrinho").classList.add("hidden");
-  document.getElementById("tela-regra-promo").classList.remove("hidden");
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("btnSalvarContato").addEventListener("click",salvarTelefone);
+  renderTelefone();
+  if(!telefoneDigits) abrirPopup();
+});
 
-  document.getElementById("btnCarrinho").style.display = "inline-block";
-  document.getElementById("btnEnviarPedido").style.display = "none";
+/* --------------------------------------------- */
+/* CARRINHO + TOTAL + WHATSAPP – igual ao seu   */
+/* --------------------------------------------- */
 
-  const box = document.getElementById("regras-promo-box");
-
-  if (!promoConfig || !promoConfig.ativa || !Array.isArray(promoConfig.niveis) || promoConfig.niveis.length === 0){
-    box.innerHTML = "<p>Nenhuma promoção progressiva ativa no momento.</p>";
-    return;
-  }
-
-  let html = `<p><b>🎁 Promoção Progressiva MelKits</b></p>`;
-  html += `<p>Some as quantidades de <b>todas as caixas</b> do pedido (exceto brindes).<br>
-           Ao atingir cada nível, você ganha <b>1 produto brinde</b> do catálogo:</p>`;
-  html += `<ul>`;
-
-  promoConfig.niveis
-    .filter(nv => nv && nv.qtd && nv.codigo)
-    .sort((a,b) => a.qtd - b.qtd)
-    .forEach(nv => {
-      html += `<li>Comprando <b>${nv.qtd}</b> caixas → ganha o produto código <b>${nv.codigo}</b>.</li>`;
-    });
-
-  html += `</ul>`;
-  html += `<p style="font-size:13px;color:#555;">
-             • Brindes entram no carrinho com <b>1 unidade</b> e <b>R$ 0,00</b>.<br>
-             • Brindes <b>não somam</b> para atingir os próximos níveis.<br>
-             • Sempre vale apenas o <b>maior nível atingido</b> (o brinde anterior some).<br>
-           </p>`;
-
-  box.innerHTML = html;
-}
-
-/* --- NAVEGAÇÃO ENTRE TELAS --- */
 function mostrarMarcas(){
   document.getElementById("tela-produtos").classList.add("hidden");
   document.getElementById("tela-carrinho").classList.add("hidden");
-  document.getElementById("tela-regra-promo").classList.add("hidden");
   document.getElementById("tela-marcas").classList.remove("hidden");
 
   document.getElementById("btnCarrinho").style.display="inline-block";
@@ -652,47 +561,35 @@ function mostrarMarcas(){
 }
 
 function mostrarCarrinho(){
-  // Garante cálculo do brinde ANTES de montar a tela
-  aplicarBrindeProgressivo();
-
   document.getElementById("tela-marcas").classList.add("hidden");
   document.getElementById("tela-produtos").classList.add("hidden");
-  document.getElementById("tela-regra-promo").classList.add("hidden");
   document.getElementById("tela-carrinho").classList.remove("hidden");
 
   document.getElementById("btnCarrinho").style.display="none";
   document.getElementById("btnEnviarPedido").style.display="inline-block";
 
-  const cont = document.getElementById("itens-carrinho");
-  cont.innerHTML = "";
+  const cont=document.getElementById("itens-carrinho");
+  cont.innerHTML="";
 
-  if (Object.keys(carrinho).length === 0){
-    cont.innerHTML = "<p>Seu carrinho está vazio 🛒</p>";
-    document.getElementById("total-carrinho").textContent = "Total: R$ 0,00";
-    document.getElementById("data-ultimo-pedido").textContent = "";
+  if(Object.keys(carrinho).length===0){
+    cont.innerHTML="<p>Seu carrinho está vazio 🛒</p>";
+    document.getElementById("total-carrinho").textContent="Total: R$ 0,00";
+    document.getElementById("data-ultimo-pedido").textContent="";
     return;
   }
 
-  for (const c in carrinho){
-    const p = carrinho[c];
-    const valorCx = Number(p.valor) || 0;
-    const un      = Number(p.unidades) || 1;
-    const isBrinde = p.brinde === true;
+  for(const c in carrinho){
+    const p=carrinho[c];
+    const valorCx=Number(p.valor)||0;
+    const un=Number(p.unidades)||1;
 
-    let linhaPreco = "";
-    if (isBrinde){
-      linhaPreco = `<span>🎁 Brinde · R$ 0,00</span>`;
-    } else {
-      linhaPreco = `<span>UN R$ ${(valorCx/un).toFixed(2)} · Cx R$ ${valorCx.toFixed(2)}</span>`;
-    }
-
-    cont.innerHTML += `
+    cont.innerHTML+=`
       <div class="carrinho-item">
         <img src="${p.imagem}">
         <div style="flex:1;text-align:left;">
-          <b>${isBrinde ? "🎁 Brinde: " + p.descricao : p.descricao}</b><br>
+          <b>${p.descricao}</b><br>
           <small>Qt Cx: ${un} · (${p.codigo})</small><br>
-          ${linhaPreco}
+          <span>UN R$ ${(valorCx/un).toFixed(2)} · Cx R$ ${valorCx.toFixed(2)}</span>
         </div>
 
         <div class="qtd-container">
@@ -706,250 +603,129 @@ function mostrarCarrinho(){
   atualizarTotal();
 }
 
-/* ============================================================
-   ALTERAR QUANTIDADE / CARRINHO  (ENGINE NOVA + promo.json)
-   ============================================================ */
-function alterarQtd(cod, delta, dentroCarrinho = false) {
-  const prod = produtos.find(p => String(p.codigo) === String(cod));
-  if (!prod) return;
+function alterarQtd(cod,delta,dentroCarrinho=false){
+  const prod=produtos.find(p=>p.codigo===cod);
+  if(!prod) return;
 
-  const atual = carrinho[cod]?.qtd || 0;
-  let nova = atual + delta;
+  const atual=carrinho[cod]?.qtd||0;
+  let nova=atual+delta;
+  if(nova<0) nova=0;
 
-  if (nova < 0) nova = 0;
+  const valorCx=Number(prod.valor)||0;
+  const un=Number(prod.unidades)||1;
 
-  const valorCx = Number(prod.valor) || 0;
-  const un = Number(prod.unidades) || 1;
+  if(nova>0){
+    carrinho[cod]={...prod,valor:valorCx,unidades:un,qtd:nova};
+  }else delete carrinho[cod];
 
-  if (nova > 0) {
-    carrinho[cod] = {
-      ...prod,
-      valor: valorCx,
-      unidades: un,
-      qtd: nova
-    };
-  } else {
-    delete carrinho[cod];
-  }
-
-  // atualiza inputs na tela
-  const i1 = document.getElementById(`qtd-${cod}`);
-  const i2 = document.getElementById(`qtd-carrinho-${cod}`);
-  if (i1) i1.value = nova;
-  if (i2) i2.value = nova;
-
-  // 🔥 recalcula brinde da promo progressiva
-  aplicarBrindeProgressivo();
+  const i1=document.getElementById(`qtd-${cod}`);
+  const i2=document.getElementById(`qtd-carrinho-${cod}`);
+  if(i1) i1.value=nova;
+  if(i2) i2.value=nova;
 
   atualizarTotal();
 }
 
-function cliqueRapido(cod, delta, dentroCarrinho = false) {
-  alterarQtd(cod, delta, dentroCarrinho);
+function cliqueRapido(cod,delta,dentro){
+  alterarQtd(cod,delta,dentro);
 }
 
-function atualizarTotal() {
-  let total = 0;
-
-  for (const c in carrinho) {
-    total += (Number(carrinho[c].valor) || 0) * (Number(carrinho[c].qtd) || 0);
+function atualizarTotal(){
+  let total=0;
+  for(const c in carrinho){
+    total+=carrinho[c].valor*carrinho[c].qtd;
   }
 
-  document.getElementById("total").textContent =
-    "Total: R$ " + total.toFixed(2);
-
-  const t = document.getElementById("total-carrinho");
-  if (t) t.textContent = "Total: R$ " + total.toFixed(2);
+  document.getElementById("total").textContent="Total: R$ "+total.toFixed(2);
+  const t=document.getElementById("total-carrinho");
+  if(t) t.textContent="Total: R$ "+total.toFixed(2);
 }
-
-/* ============================================================
-   BLOCO 4 — TELEFONE + WHATSAPP + ÚLTIMO PEDIDO
-   ============================================================ */
-
-/* --- TELEFONE --- */
-document.addEventListener("input", e => {
-  if (e.target.id === "telefone-input") {
-    let v = e.target.value.replace(/\D/g, "");
-    if (v.length > 11) v = v.slice(0, 11);
-    if (v.length >= 7)
-      e.target.value = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
-    else if (v.length > 2)
-      e.target.value = `(${v.slice(0, 2)}) ${v.slice(2)}`;
-    else e.target.value = v;
-  }
-});
-
-function renderTelefone() {
-  const el = document.getElementById("telefone-container");
-  el.innerHTML = telefoneDigits
-    ? `<span>${telefoneDisplay}</span><button onclick="editarTelefone()">✏️ Editar</button>`
-    : `<span style="color:#666;">Nenhum contato cadastrado</span> <button onclick="abrirPopup()">Cadastrar</button>`;
-}
-
-function abrirPopup() {
-  document.getElementById("popup").style.display = "flex";
-}
-
-function fecharPopup() {
-  document.getElementById("popup").style.display = "none";
-}
-
-function salvarTelefone() {
-  const inp = document.getElementById("telefone-input");
-  const digits = inp.value.replace(/\D/g, "");
-  if (digits.length < 10) {
-    alert("Número inválido!");
-    return;
-  }
-
-  const ddd = digits.slice(0, 2);
-  const corpo = digits.slice(2);
-  const exib =
-    corpo.length === 8
-      ? `(${ddd}) ${corpo.slice(0, 4)}-${corpo.slice(4)}`
-      : `(${ddd}) ${corpo.slice(0, 5)}-${corpo.slice(5)}`;
-
-  telefoneDigits = digits;
-  telefoneDisplay = exib;
-
-  localStorage.setItem("telefone_digits", digits);
-  localStorage.setItem("telefone_display", exib);
-
-  fecharPopup();
-  renderTelefone();
-}
-
-function editarTelefone() {
-  localStorage.removeItem("telefone_digits");
-  localStorage.removeItem("telefone_display");
-  telefoneDigits = "";
-  telefoneDisplay = "";
-  abrirPopup();
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  document
-    .getElementById("btnSalvarContato")
-    .addEventListener("click", salvarTelefone);
-
-  renderTelefone();
-  if (!telefoneDigits) abrirPopup();
-});
 
 /* --- ENVIAR WHATSAPP --- */
-function enviarWhatsApp() {
-  if (!telefoneDigits) {
+
+function enviarWhatsApp(){
+  if(!telefoneDigits){
     alert("Cadastre um contato primeiro.");
     abrirPopup();
     return;
   }
-  if (Object.keys(carrinho).length === 0) {
+  if(Object.keys(carrinho).length===0){
     alert("Seu carrinho está vazio.");
     return;
   }
 
-  // Garante brinde do promo.json antes de enviar
-  aplicarBrindeProgressivo();
+  let total=0;
+  let linhas=[];
 
-  let total = 0;
-  let linhas = [];
+  for(const cod in carrinho){
+    const p=carrinho[cod];
+    const valorCx=Number(p.valor)||0;
+    const un=Number(p.unidades)||1;
+    const valorUn=valorCx/un;
+    total+=valorCx*p.qtd;
 
-  for (const cod in carrinho) {
-    const p = carrinho[cod];
-    const valorCx = Number(p.valor) || 0;
-    const un = Number(p.unidades) || 1;
-    const valorUn = un ? valorCx / un : valorCx;
-
-    if (p.brinde === true) {
-      linhas.push(
-        `Brinde: ${p.descricao}\n` +
-          `Qtd: ${p.qtd}\n` +
-          `Valor: R$ 0,00\n`
-      );
-    } else {
-      total += valorCx * p.qtd;
-      linhas.push(
-        `${p.descricao}\n` +
-          `Qt Cx: ${un} . (${p.codigo})\n` +
-          `UN R$ ${valorUn.toFixed(2)}  . Cx R$ ${valorCx.toFixed(2)}\n` +
-          `Qtd Pedida: ${p.qtd} Cx\n`
-      );
-    }
+    linhas.push(
+      `${p.descricao}\n`+
+      `Qt Cx: ${un} . (${p.codigo})\n`+
+      `UN R$ ${valorUn.toFixed(2)}  . Cx R$ ${valorCx.toFixed(2)}\n`+
+      `Qtd Pedida: ${p.qtd} Cx\n`
+    );
   }
 
-  const ddd = telefoneDigits.slice(0, 2);
-  const resto = telefoneDigits.slice(2);
+  const ddd=telefoneDigits.slice(0,2);
+  const resto=telefoneDigits.slice(2);
 
-  const msg =
-    `Contato: ${ddd}-${resto}\n` +
-    `PEDIDO ONLINE\n\n` +
-    linhas.join("\n") +
+  const msg=
+    `Contato: ${ddd}-${resto}\n`+
+    `PEDIDO ONLINE\n\n`+
+    linhas.join("\n")+
     `\nTOTAL: R$ ${total.toFixed(2)}`;
 
-  const ultimo = {
-    data: new Date().toISOString(),
-    itens: carrinho,
-    total: total,
-    telefoneDigits: telefoneDigits
+  const ultimo={
+    data:new Date().toISOString(),
+    itens:carrinho,
+    total:total,
+    telefoneDigits:telefoneDigits
   };
+  localStorage.setItem(STORAGE_ULTIMO,JSON.stringify(ultimo));
 
-  localStorage.setItem(STORAGE_ULTIMO, JSON.stringify(ultimo));
-
-  const url = `https://wa.me/55${telefoneDigits}?text=${encodeURIComponent(
-    msg
-  )}`;
-  window.open(url, "_blank");
+  const url=`https://wa.me/55${telefoneDigits}?text=${encodeURIComponent(msg)}`;
+  window.open(url,"_blank");
 }
 
 /* --- ÚLTIMO PEDIDO --- */
-function exibirUltimoPedido() {
-  const raw = localStorage.getItem(STORAGE_ULTIMO);
-  if (!raw) {
-    alert("Nenhum pedido anterior.");
-    return;
-  }
 
-  try {
-    const ult = JSON.parse(raw);
-    if (!ult.itens) {
-      alert("Nenhum pedido anterior.");
-      return;
-    }
+function exibirUltimoPedido(){
+  const raw=localStorage.getItem(STORAGE_ULTIMO);
+  if(!raw){alert("Nenhum pedido anterior.");return;}
 
-    carrinho = {};
+  try{
+    const ult=JSON.parse(raw);
+    if(!ult.itens){alert("Nenhum pedido anterior.");return;}
 
-    for (const c in ult.itens) {
-      const p = ult.itens[c];
-      carrinho[c] = { ...p, qtd: Number(p.qtd) || 0 };
+    carrinho={};
+    for(const c in ult.itens){
+      const p=ult.itens[c];
+      carrinho[c]={...p,qtd:Number(p.qtd)||0};
     }
 
     mostrarCarrinho();
 
-    const el = document.getElementById("data-ultimo-pedido");
-
-    if (el) {
-      const dt = new Date(ult.data);
-      if (!isNaN(dt.getTime())) {
-        el.textContent =
-          "Último pedido em: " +
-          dt.toLocaleString("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "numeric"
+    const el=document.getElementById("data-ultimo-pedido");
+    if(el){
+      const dt=new Date(ult.data);
+      if(!isNaN(dt.getTime())){
+        el.textContent="Último pedido em: "+
+          dt.toLocaleString("pt-BR",{
+            day:"2-digit",month:"2-digit",year:"numeric",
+            hour:"2-digit",minute:"numeric"
           });
       }
     }
-  } catch {
+  }catch{
     alert("Erro ao carregar último pedido.");
   }
 }
-
-/* ============================================================
-   MODAL DE QUANTIDADE MANUAL
-   ============================================================ */
-function confirmarQtdManual() {
-  document.getElementById("modalQtd").style.display = "none";
-}
-
+</script>
+</body>
+</html>
