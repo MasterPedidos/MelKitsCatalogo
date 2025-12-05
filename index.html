@@ -709,19 +709,22 @@ function mostrarCarrinho(){
   atualizarTotal();
 }
 
-/* --- ALTERAR QUANTIDADE / CARRINHO --- */
-function alterarQtd(cod, delta, dentroCarrinho=false){
+/* ============================================================
+   ALTERAR QUANTIDADE / CARRINHO  (ENGINE NOVA + promo.json)
+   ============================================================ */
+function alterarQtd(cod, delta, dentroCarrinho = false) {
   const prod = produtos.find(p => String(p.codigo) === String(cod));
   if (!prod) return;
 
   const atual = carrinho[cod]?.qtd || 0;
   let nova = atual + delta;
+
   if (nova < 0) nova = 0;
 
   const valorCx = Number(prod.valor) || 0;
-  const un      = Number(prod.unidades) || 1;
+  const un = Number(prod.unidades) || 1;
 
-  if (nova > 0){
+  if (nova > 0) {
     carrinho[cod] = {
       ...prod,
       valor: valorCx,
@@ -732,26 +735,26 @@ function alterarQtd(cod, delta, dentroCarrinho=false){
     delete carrinho[cod];
   }
 
-  // Atualizar input visual no catálogo e no carrinho
+  // atualiza inputs na tela
   const i1 = document.getElementById(`qtd-${cod}`);
   const i2 = document.getElementById(`qtd-carrinho-${cod}`);
   if (i1) i1.value = nova;
   if (i2) i2.value = nova;
 
-  // 🔥 recalcula o brinde progressivo da promo.json
+  // 🔥 recalcula brinde da promo progressiva
   aplicarBrindeProgressivo();
 
   atualizarTotal();
 }
 
-function cliqueRapido(cod, delta, dentroCarrinho=false){
+function cliqueRapido(cod, delta, dentroCarrinho = false) {
   alterarQtd(cod, delta, dentroCarrinho);
 }
 
-function atualizarTotal(){
+function atualizarTotal() {
   let total = 0;
 
-  for (const c in carrinho){
+  for (const c in carrinho) {
     total += (Number(carrinho[c].valor) || 0) * (Number(carrinho[c].qtd) || 0);
   }
 
@@ -759,8 +762,7 @@ function atualizarTotal(){
     "Total: R$ " + total.toFixed(2);
 
   const t = document.getElementById("total-carrinho");
-  if (t)
-    t.textContent = "Total: R$ " + total.toFixed(2);
+  if (t) t.textContent = "Total: R$ " + total.toFixed(2);
 }
 
 /* ============================================================
@@ -768,43 +770,49 @@ function atualizarTotal(){
    ============================================================ */
 
 /* --- TELEFONE --- */
-document.addEventListener("input", e=>{
-  if (e.target.id === "telefone-input"){
-    let v = e.target.value.replace(/\D/g,"");
-    if (v.length > 11) v = v.slice(0,11);
-    if (v.length >= 7) e.target.value = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
-    else if (v.length > 2) e.target.value = `(${v.slice(0,2)}) ${v.slice(2)}`;
+document.addEventListener("input", e => {
+  if (e.target.id === "telefone-input") {
+    let v = e.target.value.replace(/\D/g, "");
+    if (v.length > 11) v = v.slice(0, 11);
+    if (v.length >= 7)
+      e.target.value = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
+    else if (v.length > 2)
+      e.target.value = `(${v.slice(0, 2)}) ${v.slice(2)}`;
     else e.target.value = v;
   }
 });
 
-function renderTelefone(){
+function renderTelefone() {
   const el = document.getElementById("telefone-container");
   el.innerHTML = telefoneDigits
     ? `<span>${telefoneDisplay}</span><button onclick="editarTelefone()">✏️ Editar</button>`
     : `<span style="color:#666;">Nenhum contato cadastrado</span> <button onclick="abrirPopup()">Cadastrar</button>`;
 }
 
-function abrirPopup(){ document.getElementById("popup").style.display="flex"; }
-function fecharPopup(){ document.getElementById("popup").style.display="none"; }
+function abrirPopup() {
+  document.getElementById("popup").style.display = "flex";
+}
 
-function salvarTelefone(){
+function fecharPopup() {
+  document.getElementById("popup").style.display = "none";
+}
+
+function salvarTelefone() {
   const inp = document.getElementById("telefone-input");
-  const digits = inp.value.replace(/\D/g,"");
-
-  if (digits.length < 10){
+  const digits = inp.value.replace(/\D/g, "");
+  if (digits.length < 10) {
     alert("Número inválido!");
     return;
   }
 
-  const ddd = digits.slice(0,2);
+  const ddd = digits.slice(0, 2);
   const corpo = digits.slice(2);
+  const exib =
+    corpo.length === 8
+      ? `(${ddd}) ${corpo.slice(0, 4)}-${corpo.slice(4)}`
+      : `(${ddd}) ${corpo.slice(0, 5)}-${corpo.slice(5)}`;
 
-  const exib = corpo.length === 8
-    ? `(${ddd}) ${corpo.slice(0,4)}-${corpo.slice(4)}`
-    : `(${ddd}) ${corpo.slice(0,5)}-${corpo.slice(5)}`;
-
-  telefoneDigits  = digits;
+  telefoneDigits = digits;
   telefoneDisplay = exib;
 
   localStorage.setItem("telefone_digits", digits);
@@ -814,71 +822,71 @@ function salvarTelefone(){
   renderTelefone();
 }
 
-function editarTelefone(){
+function editarTelefone() {
   localStorage.removeItem("telefone_digits");
   localStorage.removeItem("telefone_display");
-
   telefoneDigits = "";
   telefoneDisplay = "";
-
   abrirPopup();
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
-  document.getElementById("btnSalvarContato").addEventListener("click", salvarTelefone);
+document.addEventListener("DOMContentLoaded", () => {
+  document
+    .getElementById("btnSalvarContato")
+    .addEventListener("click", salvarTelefone);
+
   renderTelefone();
   if (!telefoneDigits) abrirPopup();
 });
 
 /* --- ENVIAR WHATSAPP --- */
-function enviarWhatsApp(){
-  if (!telefoneDigits){
+function enviarWhatsApp() {
+  if (!telefoneDigits) {
     alert("Cadastre um contato primeiro.");
     abrirPopup();
     return;
   }
-
-  if (Object.keys(carrinho).length === 0){
+  if (Object.keys(carrinho).length === 0) {
     alert("Seu carrinho está vazio.");
     return;
   }
 
-  // 🔥 garante brinde atualizado antes de enviar
+  // Garante brinde do promo.json antes de enviar
   aplicarBrindeProgressivo();
 
   let total = 0;
   let linhas = [];
 
-  for (const cod in carrinho){
+  for (const cod in carrinho) {
     const p = carrinho[cod];
     const valorCx = Number(p.valor) || 0;
-    const un      = Number(p.unidades) || 1;
+    const un = Number(p.unidades) || 1;
     const valorUn = un ? valorCx / un : valorCx;
 
-    if (p.brinde === true){
+    if (p.brinde === true) {
       linhas.push(
-        `Brinde: ${p.descricao}\n`+
-        `Qtd: ${p.qtd}\n`+
-        `Valor: R$ 0,00\n`
+        `Brinde: ${p.descricao}\n` +
+          `Qtd: ${p.qtd}\n` +
+          `Valor: R$ 0,00\n`
       );
     } else {
       total += valorCx * p.qtd;
       linhas.push(
-        `${p.descricao}\n`+
-        `Qt Cx: ${un} . (${p.codigo})\n`+
-        `UN R$ ${valorUn.toFixed(2)}  . Cx R$ ${valorCx.toFixed(2)}\n`+
-        `Qtd Pedida: ${p.qtd} Cx\n`
+        `${p.descricao}\n` +
+          `Qt Cx: ${un} . (${p.codigo})\n` +
+          `UN R$ ${valorUn.toFixed(2)}  . Cx R$ ${valorCx.toFixed(2)}\n` +
+          `Qtd Pedida: ${p.qtd} Cx\n`
       );
     }
   }
 
-  const ddd   = telefoneDigits.slice(0,2);
+  const ddd = telefoneDigits.slice(0, 2);
   const resto = telefoneDigits.slice(2);
 
   const msg =
-    `Contato: ${ddd}-${resto}\n`+
-    `PEDIDO ONLINE\n\n`+
-    linhas.join("\n")+
+    `Contato: ${ddd}-${resto}\n` +
+    `PEDIDO ONLINE\n\n` +
+    linhas.join("\n") +
     `\nTOTAL: R$ ${total.toFixed(2)}`;
 
   const ultimo = {
@@ -890,27 +898,30 @@ function enviarWhatsApp(){
 
   localStorage.setItem(STORAGE_ULTIMO, JSON.stringify(ultimo));
 
-  const url = `https://wa.me/55${telefoneDigits}?text=${encodeURIComponent(msg)}`;
+  const url = `https://wa.me/55${telefoneDigits}?text=${encodeURIComponent(
+    msg
+  )}`;
   window.open(url, "_blank");
 }
 
 /* --- ÚLTIMO PEDIDO --- */
-function exibirUltimoPedido(){
+function exibirUltimoPedido() {
   const raw = localStorage.getItem(STORAGE_ULTIMO);
-  if (!raw){
+  if (!raw) {
     alert("Nenhum pedido anterior.");
     return;
   }
 
   try {
     const ult = JSON.parse(raw);
-    if (!ult.itens){
+    if (!ult.itens) {
       alert("Nenhum pedido anterior.");
       return;
     }
 
     carrinho = {};
-    for (const c in ult.itens){
+
+    for (const c in ult.itens) {
       const p = ult.itens[c];
       carrinho[c] = { ...p, qtd: Number(p.qtd) || 0 };
     }
@@ -918,9 +929,10 @@ function exibirUltimoPedido(){
     mostrarCarrinho();
 
     const el = document.getElementById("data-ultimo-pedido");
-    if (el){
+
+    if (el) {
       const dt = new Date(ult.data);
-      if (!isNaN(dt.getTime())){
+      if (!isNaN(dt.getTime())) {
         el.textContent =
           "Último pedido em: " +
           dt.toLocaleString("pt-BR", {
@@ -932,15 +944,14 @@ function exibirUltimoPedido(){
           });
       }
     }
-  }
-  catch {
+  } catch {
     alert("Erro ao carregar último pedido.");
   }
 }
 
 /* ============================================================
-   MODAL DE QUANTIDADE MANUAL (opcional)
+   MODAL DE QUANTIDADE MANUAL
    ============================================================ */
-function confirmarQtdManual(){
+function confirmarQtdManual() {
   document.getElementById("modalQtd").style.display = "none";
 }
