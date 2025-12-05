@@ -608,7 +608,6 @@ function aplicarBrindeProgressivo() {
   };
 }
 
-
 /* --- TELA DE REGRAS DA PROMOÇÃO PROGRESSIVA --- */
 
 function mostrarTelaPromo(){
@@ -649,7 +648,37 @@ function mostrarTelaPromo(){
   box.innerHTML = html;
 }
 
+/* ============================================================
+   FUNÇÃO PARA GERAR LINHA DO CARRINHO (NOVO PADRÃO)
+   ============================================================ */
+function gerarLinhaCarrinho(p){
+  const valorCx = Number(p.valor) || 0;
+  const un      = Number(p.unidades) || 1;
+  const isBrinde = p.brinde === true;
+
+  let linhaPreco = isBrinde
+      ? `<span>🎁 Brinde · R$ 0,00</span>`
+      : `<span>UN R$ ${(valorCx/un).toFixed(2)} · Cx R$ ${valorCx.toFixed(2)}</span>`;
+
+  return `
+    <div class="carrinho-item">
+      <img src="${p.imagem}">
+      <div style="flex:1;text-align:left;">
+        <b>${isBrinde ? "🎁 Brinde: " + p.descricao : p.descricao}</b><br>
+        <small>Qt Cx: ${un} · (${p.codigo})</small><br>
+        ${linhaPreco}
+      </div>
+
+      <div class="qtd-container">
+        <button onclick="cliqueRapido('${p.codigo}',-1,true)">-</button>
+        <input id="qtd-carrinho-${p.codigo}" value="${p.qtd}">
+        <button onclick="cliqueRapido('${p.codigo}',1,true)">+</button>
+      </div>
+    </div>`;
+}
+
 /* --- NAVEGAÇÃO ENTRE TELAS --- */
+
 function mostrarMarcas(){
   document.getElementById("tela-produtos").classList.add("hidden");
   document.getElementById("tela-carrinho").classList.add("hidden");
@@ -660,8 +689,11 @@ function mostrarMarcas(){
   document.getElementById("btnEnviarPedido").style.display="none";
 }
 
+/* ============================================================
+   CARRINHO — VERSÃO COM BRINDE NO TOPO
+   ============================================================ */
 function mostrarCarrinho(){
-  // Garante cálculo do brinde ANTES de montar a tela
+  // Sempre recalcula o brinde antes
   aplicarBrindeProgressivo();
 
   document.getElementById("tela-marcas").classList.add("hidden");
@@ -682,35 +714,28 @@ function mostrarCarrinho(){
     return;
   }
 
+  /* --- SEPARA BRINDE E ITENS NORMAIS --- */
+  const itensNormais = [];
+  let itemBrinde = null;
+
   for (const c in carrinho){
     const p = carrinho[c];
-    const valorCx = Number(p.valor) || 0;
-    const un      = Number(p.unidades) || 1;
-    const isBrinde = p.brinde === true;
-
-    let linhaPreco = "";
-    if (isBrinde){
-      linhaPreco = `<span>🎁 Brinde · R$ 0,00</span>`;
+    if (p.brinde === true){
+      itemBrinde = p;  // apenas 1 brinde
     } else {
-      linhaPreco = `<span>UN R$ ${(valorCx/un).toFixed(2)} · Cx R$ ${valorCx.toFixed(2)}</span>`;
+      itensNormais.push(p);
     }
-
-    cont.innerHTML += `
-      <div class="carrinho-item">
-        <img src="${p.imagem}">
-        <div style="flex:1;text-align:left;">
-          <b>${isBrinde ? "🎁 Brinde: " + p.descricao : p.descricao}</b><br>
-          <small>Qt Cx: ${un} · (${p.codigo})</small><br>
-          ${linhaPreco}
-        </div>
-
-        <div class="qtd-container">
-          <button onclick="cliqueRapido('${p.codigo}',-1,true)">-</button>
-          <input id="qtd-carrinho-${p.codigo}" value="${p.qtd}">
-          <button onclick="cliqueRapido('${p.codigo}',1,true)">+</button>
-        </div>
-      </div>`;
   }
+
+  /* --- 1) Mostra o BRINDE no TOPO (se existir) --- */
+  if (itemBrinde){
+    cont.innerHTML += gerarLinhaCarrinho(itemBrinde);
+  }
+
+  /* --- 2) Depois os itens normais --- */
+  itensNormais.forEach(p => {
+    cont.innerHTML += gerarLinhaCarrinho(p);
+  });
 
   atualizarTotal();
 }
@@ -916,6 +941,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
