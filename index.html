@@ -329,7 +329,7 @@ fetch('produtos.json')
 
 /* --- CARREGAR CONFIG.JSON (pega PROMO_PROGRESSIVA) --- */
 function carregarPromocaoGlobal(){
-  fetch('promo.json')
+  fetch('promo.json?cache=' + Date.now())   // ⬅🔥 impede cache e força atualização instantânea
     .then(r => r.json())
     .then(cfg => {
 
@@ -374,6 +374,9 @@ function carregarPromocaoGlobal(){
 }
 
 carregarPromocaoGlobal();
+
+// 🔥🔥🔥 Atualização instantânea sempre que o usuário voltar para o app
+window.addEventListener("focus", carregarPromocaoGlobal);
 
 /* ============================================================
    BLOCO 2 — LISTAGEM DE PRODUTOS + PROMO 1 / PROMO 2
@@ -1147,6 +1150,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
