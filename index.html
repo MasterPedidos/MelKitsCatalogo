@@ -979,14 +979,13 @@ function enviarWhatsApp(){
   // 2) Recalcula o brinde com as regras ATUAIS
   aplicarBrindeProgressivo();
 
-  // 3) Se não houver itens normais → remover brinde
+  // 3) Se não houver itens normais → remover brinde e bloquear envio
   const setBrindes2 = new Set(codigosBrinde);
   const itensNormais = Object.keys(carrinho).filter(c => !setBrindes2.has(c));
 
   if (itensNormais.length === 0) {
     for (const c of setBrindes2) delete carrinho[c];
 
-    // se ficar totalmente vazio → impedir envio
     if (Object.keys(carrinho).length === 0){
       alert("Seu pedido não contém itens suficientes para o brinde.");
       return;
@@ -1007,7 +1006,6 @@ function enviarWhatsApp(){
     const valorUn = un ? valorCx/un : valorCx;
 
     if (p.brinde === true){
-      // Mensagem especial para brinde
       linhas.push(
         `Brinde: ${p.descricao}\n`+
         `Qtd: ${p.qtd}\n`+
@@ -1060,23 +1058,18 @@ function exibirUltimoPedido(){
       return;
     }
 
-    // 🔥 Ativa modo especial → NÃO recalcular brinde agora
     carregandoUltimoPedido = true;
 
-    // Carrega o carrinho salvo
     carrinho = {};
     for (const c in ult.itens){
       const p = ult.itens[c];
       carrinho[c] = { ...p, qtd: Number(p.qtd) || 0 };
     }
 
-    // Mostra o carrinho com o brinde antigo exatamente como estava
     mostrarCarrinho();
 
-    // 🔥 Desativa modo especial → mudanças futuras recalculam o brinde
     carregandoUltimoPedido = false;
 
-    // Exibir data do pedido
     const el = document.getElementById("data-ultimo-pedido");
     if (el){
       const dt = new Date(ult.data);
@@ -1098,9 +1091,11 @@ function exibirUltimoPedido(){
 function confirmarQtdManual(){
   document.getElementById("modalQtd").style.display = "none";
 }
+
 </script>
 </body>
 </html>
+
 
 
 
