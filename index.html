@@ -324,7 +324,7 @@ fetch('produtos.json')
 
 /* --- CARREGAR CONFIG.JSON (pega PROMO_PROGRESSIVA) --- */
 function carregarPromocaoGlobal(){
-  fetch('config.json')
+  fetch('promo.json')
     .then(r => r.json())
     .then(cfg => {
       // Esperando bloco PROMO_PROGRESSIVA
@@ -906,3 +906,4 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
