@@ -546,50 +546,53 @@ function mostrarPromocoes(){
    ============================================================ */
 
 /* --- CALCULAR / APLICAR BRINDE PROGRESSIVO --- */
-function aplicarBrindeProgressivo(){
+function aplicarBrindeProgressivo() {
 
+  // Se não há promoção → remove brindes e sai
   if (!promoConfig || !promoConfig.ativa || !Array.isArray(promoConfig.niveis)) {
-    // se não tiver promo ativa, remove eventual brinde antigo
-    if (codigosBrinde.length){
-      codigosBrinde.forEach(c => { if (carrinho[c]) delete carrinho[c]; });
-    }
+    codigosBrinde.forEach(c => { if (carrinho[c]) delete carrinho[c]; });
     return;
   }
 
   const setBrindes = new Set(codigosBrinde);
 
-  // 1) Soma total de caixas do pedido (IGNORANDO brindes)
+  // 1) SOMA apenas produtos normais
   let totalCaixas = 0;
-  for (const cod in carrinho){
-    if (!setBrindes.has(String(cod))){
+  for (const cod in carrinho) {
+    if (!setBrindes.has(String(cod))) {
       totalCaixas += Number(carrinho[cod].qtd) || 0;
     }
   }
 
-  // 2) Encontra o nível MAIS ALTO atingido
+  // 2) DESCOBRE o maior nível atingido
   let nivelEscolhido = null;
   promoConfig.niveis
-    .filter(nv => nv && typeof nv.qtd === "number" && nv.qtd > 0 && nv.codigo)
-    .sort((a,b) => a.qtd - b.qtd)
+    .filter(nv => nv && nv.qtd > 0 && nv.codigo)
+    .sort((a, b) => a.qtd - b.qtd)
     .forEach(nv => {
-      if (totalCaixas >= nv.qtd){
-        nivelEscolhido = nv;
-      }
+      if (totalCaixas >= nv.qtd) nivelEscolhido = nv;
     });
 
-  // 3) Remove QUALQUER brinde atual do carrinho
+  // 3) REMOVE todos brindes atuais
   codigosBrinde.forEach(c => {
     if (carrinho[c]) delete carrinho[c];
   });
 
-  // 4) Se não atingiu nenhum nível → sai
+  // 4) NÃO atingiu nenhum nível → sai
   if (!nivelEscolhido) return;
 
   const codBrinde = String(nivelEscolhido.codigo);
-  const produtoBrinde = produtos.find(p => String(p.codigo).trim() === codBrinde);
-  if (!produtoBrinde) return;
 
-  // 5) Adiciona brinde (1 unidade, preço 0)
+  // 5) BUSCAR produto brinde no catálogo
+  const produtoBrinde = produtos.find(
+    p => String(p.codigo).trim() === codBrinde
+  );
+  if (!produtoBrinde) {
+    console.warn("⚠ Brinde não encontrado no produtos.json:", codBrinde);
+    return;
+  }
+
+  // 6) INSERE brinde no carrinho (sempre 1 unidade, valor 0)
   carrinho[codBrinde] = {
     ...produtoBrinde,
     codigo: codBrinde,
@@ -601,6 +604,7 @@ function aplicarBrindeProgressivo(){
 }
 
 /* --- TELA DE REGRAS DA PROMOÇÃO PROGRESSIVA --- */
+
 function mostrarTelaPromo(){
   document.getElementById("tela-marcas").classList.add("hidden");
   document.getElementById("tela-produtos").classList.add("hidden");
@@ -906,4 +910,5 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
