@@ -1,5 +1,5 @@
 [
-{"codigo": "1080","descricao": "Kit Grego Danone 2 Polpas","marca": "Danone","valor": 25.16,"valor_promo": 18.50,"promo": true,"imagem": "https://i.ibb.co/Kxc1y7k5/1080-Kit-Grego-Polpa-png.png"},
+{"codigo": "1080","descricao": "Kit Grego Danone 2 Polpas","marca": "Danone","valor": 25.16,"unidades":0,"imagem":"https://i.ibb.co/Kxc1y7k5/1080-Kit-Grego-Polpa-png.png"},
 {"codigo":"1036","descricao":"Kit  Sensacao Danone","marca":"Danone","valor": 68.82,"unidades":0,"imagem":"https://i.ibb.co/KcRdP5dT/1036-Kit-sensa-o-m-png.png"},
 {"codigo":"1418","descricao":"Kit 10 Garrafinha C/10","marca":"Danone","valor": 32.56,"unidades":0,"imagem":"https://i.ibb.co/4RtB8j45/1418-Kit-Garrafinha-Com-10-m-png.png"},
 {"codigo":"1040","descricao":"Kit 40 Danone","marca":"Danone","valor": 54.76,"unidades":0,"imagem":"https://i.ibb.co/pvgK02Tt/1040-Kit-40-m-png.png"},
@@ -60,6 +60,7 @@
 {"codigo":"784","descricao":"Kit Torcida","marca":"Elma Chips","valor": 13.32,"unidades":0,"imagem":"https://i.ibb.co/zVvC022n/784-Kit-torcida-png.png"},
 {"codigo":"83122","descricao":"KITYOPRO 6","marca":"Danone","valor": 48.1,"unidades":0,"imagem":"https://i.ibb.co/fGvDjmhV/83122-K-Yopro-m-png.png"}
 ]
+
 
 
 
