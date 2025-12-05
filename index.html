@@ -565,9 +565,13 @@ function mostrarPromocoes(){
 /* ============================================================
    BLOCO 3 — PROMO PROGRESSIVA (NÍVEIS) + CARRINHO
    ============================================================ */
-
 /* --- CALCULAR / APLICAR BRINDE PROGRESSIVO --- */
 function aplicarBrindeProgressivo() {
+
+  // 🔥 NÃO recalcular brinde ao carregar último pedido
+  if (carregandoUltimoPedido) {
+    return;
+  }
 
   // ⚠ proteção: só roda se produtos já carregaram
   if (!produtosCarregados || produtos.length === 0) {
@@ -1026,6 +1030,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
