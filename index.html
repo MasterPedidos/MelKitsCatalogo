@@ -212,12 +212,12 @@ button#voltar {
 
   <!-- Botão REGRAS DA PROMOÇÃO PROGRESSIVA -->
   <div style="width:100%; text-align:center; margin-top:8px;">
-      <button class="marca-btn" style="background:#2b7bba;" onclick="mostrarTelaPromo()">
+      <button id="btnRegrasPromo" class="marca-btn" 
+              style="background:#2b7bba;" 
+              onclick="mostrarTelaPromo()">
           📜 Regras da Promoção
       </button>
   </div>
-
-</div>
 
 <!-- POPUP TELEFONE -->
 <div id="popup">
@@ -327,16 +327,17 @@ function carregarPromocaoGlobal(){
   fetch('promo.json')
     .then(r => r.json())
     .then(cfg => {
-      // Esperando bloco PROMO_PROGRESSIVA
+
+      // 1) Identifica bloco PROMO_PROGRESSIVA (maiúsculas/minúsculas)
       if (cfg && cfg.PROMO_PROGRESSIVA){
         promoConfig = cfg.PROMO_PROGRESSIVA;
       } else if (cfg && cfg.promo_progressiva){
-        // fallback se estiver em minúsculo
         promoConfig = cfg.promo_progressiva;
       } else {
         promoConfig = null;
       }
 
+      // 2) Limpa lista e preenche códigos de brinde
       codigosBrinde = [];
       if (promoConfig && promoConfig.ativa && Array.isArray(promoConfig.niveis)) {
         promoConfig.niveis.forEach(nv => {
@@ -345,10 +346,25 @@ function carregarPromocaoGlobal(){
           }
         });
       }
+
+      // 3) 🔥 MOSTRAR / OCULTAR BOTÃO "REGRAS DA PROMOÇÃO"
+      const btnRegras = document.getElementById("btnRegrasPromo");
+      if (btnRegras) {
+        if (!promoConfig || !promoConfig.ativa) {
+          btnRegras.style.display = "none";          // PROMO DESATIVADA → ESCONDE
+        } else {
+          btnRegras.style.display = "inline-block";  // PROMO ATIVADA → MOSTRA
+        }
+      }
+
     })
     .catch(() => {
+      // Em caso de erro, desativa tudo
       promoConfig = null;
       codigosBrinde = [];
+
+      const btnRegras = document.getElementById("btnRegrasPromo");
+      if (btnRegras) btnRegras.style.display = "none";
     });
 }
 
@@ -989,6 +1005,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
