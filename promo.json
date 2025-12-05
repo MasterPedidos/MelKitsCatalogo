@@ -1,9 +1,13 @@
 {
-  "ativa": true,
-  "niveis": [
-    { "qtd": 10, "codigo": "1046" },
-    { "qtd": 20, "codigo": "1050" },
-    { "qtd": 30, "codigo": "1078" },
-    { "qtd": 40, "codigo": "1097" }
-  ]
+  "PROMO_PROGRESSIVA": {
+    "ativa": true,
+    "niveis": [
+      { "qtd": 10, "codigo": "1046" },
+      { "qtd": 20, "codigo": "1050" },
+      { "qtd": 30, "codigo": "1078" },
+      { "qtd": 40, "codigo": "1097" }
+    ]
+  }
 }
+
+
