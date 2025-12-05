@@ -601,7 +601,7 @@ function aplicarBrindeProgressivo() {
   carrinho[codBrinde] = {
     ...produtoBrinde,
     codigo: codBrinde,
-    qtd: 1,
+    qtd: Number(1),
     valor: 0,
     unidades: produtoBrinde.unidades ? Number(produtoBrinde.unidades) : 1,
     brinde: true
@@ -766,7 +766,12 @@ function alterarQtd(cod, delta, dentroCarrinho=false){
   const un      = Number(prod.unidades) || 1;
 
   if (nova > 0){
-    carrinho[cod] = {...prod, valor:valorCx, unidades:un, qtd:nova};
+    carrinho[cod] = {
+      ...prod,
+      valor: valorCx,
+      unidades: un,
+      qtd: Number(nova) || 0   // força número sempre correto
+    };
   } else {
     delete carrinho[cod];
   }
@@ -954,6 +959,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
