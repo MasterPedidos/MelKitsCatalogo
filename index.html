@@ -660,6 +660,19 @@ function gerarLinhaCarrinho(p){
       ? `<span>🎁 Brinde · R$ 0,00</span>`
       : `<span>UN R$ ${(valorCx/un).toFixed(2)} · Cx R$ ${valorCx.toFixed(2)}</span>`;
 
+  // 🔥 Se for brinde → NÃO mostra botões
+  let controlesQtd = isBrinde
+    ? `<div style="font-size:14px; color:#555; padding-right:10px;">
+         (Qtd fixa)
+       </div>`
+    : `
+       <div class="qtd-container">
+         <button onclick="cliqueRapido('${p.codigo}',-1,true)">-</button>
+         <input id="qtd-carrinho-${p.codigo}" value="${p.qtd}">
+         <button onclick="cliqueRapido('${p.codigo}',1,true)">+</button>
+       </div>
+      `;
+
   return `
     <div class="carrinho-item">
       <img src="${p.imagem}">
@@ -669,11 +682,7 @@ function gerarLinhaCarrinho(p){
         ${linhaPreco}
       </div>
 
-      <div class="qtd-container">
-        <button onclick="cliqueRapido('${p.codigo}',-1,true)">-</button>
-        <input id="qtd-carrinho-${p.codigo}" value="${p.qtd}">
-        <button onclick="cliqueRapido('${p.codigo}',1,true)">+</button>
-      </div>
+      ${controlesQtd}
     </div>`;
 }
 
@@ -966,6 +975,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
