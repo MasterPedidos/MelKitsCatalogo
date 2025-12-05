@@ -942,41 +942,118 @@ function exibirUltimoPedido(){
 
   ultimoBrindeAplicado = prodBrinde.codigo;
 }
+
+/* ============================================================
+   🔥 ENGINE DE PROMOÇÃO PROGRESSIVA POR NÍVEIS (10 / 20 / 30 / 40)
+   ============================================================ */
+
+const niveisPromo = [
+  { qtd: 40, brinde: "1001" },
+  { qtd: 30, brinde: "450" },
+  { qtd: 20, brinde: "712" },
+  { qtd: 10, brinde: "899" },
+];
+
+function aplicarBrindeProgressivo() {
+
+  // remove brindes antigos antes de recalcular
+  for (const cod in carrinho) {
+    if (carrinho[cod].isBrinde === true) {
+      delete carrinho[cod];
+    }
+  }
+
+  // soma total geral de caixas compradas
+  let soma = 0;
+  for (const cod in carrinho) {
+    if (!carrinho[cod].isBrinde) {
+      soma += carrinho[cod].qtd;
+    }
+  }
+
+  // descobre nível atingido (maior)
+  let nivelAtingido = null;
+  for (const n of niveisPromo) {
+    if (soma >= n.qtd) {
+      nivelAtingido = n;
+      break;
+    }
+  }
+
+  if (!nivelAtingido) {
+    return;
+  }
+
+  // encontra o produto brinde no catálogo
+  const prodBrinde = produtos.find(
+    p => String(p.codigo) === String(nivelAtingido.brinde)
+  );
+
+  if (!prodBrinde) {
+    console.warn("Brinde não encontrado:", nivelAtingido.brinde);
+    return;
+  }
+
+  // adiciona brinde ao carrinho (1 unidade, preço 0)
+  carrinho[prodBrinde.codigo] = {
+    ...prodBrinde,
+    qtd: 1,
+    valor: 0,
+    unidades: 1,
+    isBrinde: true
+  };
+}
+
+/* ============================================================
+   ALTERAR QUANTIDADE + RECALCULAR BRINDE
+   ============================================================ */
+
 function alterarQtd(cod, delta, dentroCarrinho = false) {
-  const prod = produtos.find(p => p.codigo === cod);
+  const prod = produtos.find(p => String(p.codigo) === String(cod));
   if (!prod) return;
 
   const atual = carrinho[cod]?.qtd || 0;
   let nova = atual + delta;
+
   if (nova < 0) nova = 0;
 
   const valorCx = Number(prod.valor) || 0;
   const un = Number(prod.unidades) || 1;
 
   if (nova > 0) {
-    carrinho[cod] = { ...prod, valor: valorCx, unidades: un, qtd: nova };
+    carrinho[cod] = {
+      ...prod,
+      valor: valorCx,
+      unidades: un,
+      qtd: nova
+    };
   } else {
     delete carrinho[cod];
   }
 
+  // atualizar inputs de quantidade
   const i1 = document.getElementById(`qtd-${cod}`);
   const i2 = document.getElementById(`qtd-carrinho-${cod}`);
   if (i1) i1.value = nova;
   if (i2) i2.value = nova;
 
-  // 🔥 recalcula e insere o brinde automaticamente
+  // 🔥 recalcular brinde automaticamente
   aplicarBrindeProgressivo();
 
   atualizarTotal();
 }
 
-/* --- (Opcional) Modal de quantidade manual – se você já tem, pode ligar aqui --- */
+/* ============================================================
+   MODAL DE QUANTIDADE MANUAL (opcional)
+   ============================================================ */
+
 function confirmarQtdManual(){
-  // Aqui você pode implementar se quiser usar o modalQtd
   document.getElementById("modalQtd").style.display = "none";
 }
+   
 </script>
 </body>
 </html>
+
 
 
