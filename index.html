@@ -1089,7 +1089,7 @@ function enviarWhatsApp(){
   };
   localStorage.setItem(STORAGE_ULTIMO, JSON.stringify(ultimo));
 
-  const url = `https://wa.me/55${telefoneDigits}?text=${encodeURIComponent(msg)}`;
+  const url = `https://api.whatsapp.com/send?phone=19995840101&text=${encodeURIComponent(msg)}`;
   window.open(url, "_blank");
 }
 
@@ -1150,6 +1150,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
