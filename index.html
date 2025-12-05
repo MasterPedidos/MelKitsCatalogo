@@ -913,6 +913,15 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 
 /* --- ENVIAR WHATSAPP --- */
+  
+// Garantir que o pedido siga as regras ATUAIS
+  if (!promoConfig || !promoConfig.ativa) {
+      const setBrindes = new Set(codigosBrinde);
+      for (const c of setBrindes) {
+          delete carrinho[c];
+      }
+  }
+
 function enviarWhatsApp(){
   if (!telefoneDigits){
     alert("Cadastre um contato primeiro.");
@@ -1031,6 +1040,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
