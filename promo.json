@@ -1,6 +1,6 @@
 {
   "PROMO_PROGRESSIVA": {
-    "ativa": true,
+    "ativa": false,
     "niveis": [
       { "qtd": 10, "codigo": "1418" },
       { "qtd": 20, "codigo": "1050" },
@@ -9,6 +9,7 @@
     ]
   }
 }
+
 
 
 
