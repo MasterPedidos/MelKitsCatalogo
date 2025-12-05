@@ -693,7 +693,7 @@ function mostrarMarcas(){
    CARRINHO — VERSÃO COM BRINDE NO TOPO
    ============================================================ */
 function mostrarCarrinho(){
-  // Sempre recalcula o brinde antes
+  // 1) SEMPRE recalcula o brinde ANTES de montar
   aplicarBrindeProgressivo();
 
   document.getElementById("tela-marcas").classList.add("hidden");
@@ -706,40 +706,46 @@ function mostrarCarrinho(){
 
   const cont = document.getElementById("itens-carrinho");
   cont.innerHTML = "";
-  
-  // Quantidade de itens diferentes
+
+  if (Object.keys(carrinho).length === 0){
+    cont.innerHTML = "<p>Seu carrinho está vazio 🛒</p>";
+    document.getElementById("total-carrinho").textContent = "Total: R$ 0,00";
+    document.getElementById("data-ultimo-pedido").textContent = "";
+    document.getElementById("qtd-itens-carrinho").textContent = "";
+    return;
+  }
+
+  // 2) Quantidade total de itens e caixas
   const qtdItens = Object.keys(carrinho).length;
-  
-  // Soma total de caixas
+
   let totalCaixas = 0;
   for (const c in carrinho){
     totalCaixas += Number(carrinho[c].qtd) || 0;
   }
-  
-  // Atualizar no título (formato solicitado)
+
+  // 3) Exibe no título: (4 itens – 12 caixas)
   document.getElementById("qtd-itens-carrinho").textContent =
-    qtdItens > 0 ? `(${qtdItens} itens – ${totalCaixas} caixas)` : "";
+    `(${qtdItens} itens – ${totalCaixas} caixas)`;
 
-
-  /* --- SEPARA BRINDE E ITENS NORMAIS --- */
+  // 4) SEPARA BRINDE E ITENS NORMAIS
   const itensNormais = [];
   let itemBrinde = null;
 
   for (const c in carrinho){
     const p = carrinho[c];
     if (p.brinde === true){
-      itemBrinde = p;  // apenas 1 brinde
+      itemBrinde = p; // único brinde
     } else {
       itensNormais.push(p);
     }
   }
 
-  /* --- 1) Mostra o BRINDE no TOPO (se existir) --- */
+  // 5) Mostra BRINDE NO TOPO
   if (itemBrinde){
     cont.innerHTML += gerarLinhaCarrinho(itemBrinde);
   }
 
-  /* --- 2) Depois os itens normais --- */
+  // 6) Depois os itens normais
   itensNormais.forEach(p => {
     cont.innerHTML += gerarLinhaCarrinho(p);
   });
@@ -948,6 +954,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
