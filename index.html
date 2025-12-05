@@ -783,23 +783,29 @@ function alterarQtd(cod, delta, dentroCarrinho=false){
       ...prod,
       valor: valorCx,
       unidades: un,
-      qtd: nova   // 🔥 aqui já está garantido que é número verdadeiro
+      qtd: nova   // 🔥 quantidade garantida como número
     };
   } else {
     delete carrinho[cod];
   }
 
-  // Atualiza os inputs visuais
+  // Atualiza inputs visuais (produtos e carrinho)
   const i1 = document.getElementById(`qtd-${cod}`);
   const i2 = document.getElementById(`qtd-carrinho-${cod}`);
   if (i1) i1.value = nova;
   if (i2) i2.value = nova;
 
-  // Recalcula a progressiva com a quantidade correta
+  // Recalcula a progressiva com quantidade correta
   aplicarBrindeProgressivo();
 
-  // Atualiza totais e UI
+  // Atualiza total
   atualizarTotal();
+
+  // 🔥 NOVO: se estiver dentro do carrinho, redesenha a tela inteira
+  // Isso garante que o brinde apareça ou desapareça imediatamente
+  if (dentroCarrinho === true) {
+    mostrarCarrinho();
+  }
 }
 
 function cliqueRapido(cod, delta, dentro){
@@ -975,6 +981,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
