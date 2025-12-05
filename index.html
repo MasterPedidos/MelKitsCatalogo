@@ -707,18 +707,19 @@ function mostrarCarrinho(){
   const cont = document.getElementById("itens-carrinho");
   cont.innerHTML = "";
   
-  // Quantidade de produtos diferentes
+  // Quantidade de itens diferentes
   const qtdItens = Object.keys(carrinho).length;
   
-  document.getElementById("qtd-itens-carrinho").textContent =
-    qtdItens > 0 ? `(${qtdItens})` : "";
-
-  if (Object.keys(carrinho).length === 0){
-    cont.innerHTML = "<p>Seu carrinho está vazio 🛒</p>";
-    document.getElementById("total-carrinho").textContent = "Total: R$ 0,00";
-    document.getElementById("data-ultimo-pedido").textContent = "";
-    return;
+  // Soma total de caixas
+  let totalCaixas = 0;
+  for (const c in carrinho){
+    totalCaixas += Number(carrinho[c].qtd) || 0;
   }
+  
+  // Atualizar no título (formato solicitado)
+  document.getElementById("qtd-itens-carrinho").textContent =
+    qtdItens > 0 ? `(${qtdItens} itens – ${totalCaixas} caixas)` : "";
+
 
   /* --- SEPARA BRINDE E ITENS NORMAIS --- */
   const itensNormais = [];
@@ -947,6 +948,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
