@@ -943,17 +943,6 @@ function exibirUltimoPedido(){
   ultimoBrindeAplicado = prodBrinde.codigo;
 }
 
-/* ============================================================
-   🔥 ENGINE DE PROMOÇÃO PROGRESSIVA POR NÍVEIS (10 / 20 / 30 / 40)
-   ============================================================ */
-
-const niveisPromo = [
-  { qtd: 40, brinde: "1001" },
-  { qtd: 30, brinde: "450" },
-  { qtd: 20, brinde: "712" },
-  { qtd: 10, brinde: "899" },
-];
-
 function aplicarBrindeProgressivo() {
 
   // remove brindes antigos antes de recalcular
@@ -1054,6 +1043,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
