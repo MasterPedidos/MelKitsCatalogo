@@ -830,8 +830,39 @@ function alterarQtd(cod, delta, dentroCarrinho=false){
   if (i1) i1.value = nova;
   if (i2) i2.value = nova;
 
-  // 🔥 AQUI é onde o brinde é recalculado após o clique
+  /* ============================================================
+       🔥 REGRAS DO BRINDE PROGRESSIVO
+     ============================================================ */
+
+  // 1) Recalcula brinde normalmente
   aplicarBrindeProgressivo();
+
+  // 2) Verifica quantidade total de caixas válidas (sem incluir brinde)
+  const setBrindes = new Set(codigosBrinde);
+  let totalCaixas = 0;
+
+  for (const c in carrinho){
+    if (!setBrindes.has(String(c))){
+      totalCaixas += Number(carrinho[c].qtd) || 0;
+    }
+  }
+
+  // 3) Descobre maior nível atingido
+  let nivel = null;
+  if (promoConfig && promoConfig.ativa){
+    promoConfig.niveis.forEach(nv => {
+      if (totalCaixas >= nv.qtd) nivel = nv;
+    });
+  }
+
+  // 4) Se NÃO atingiu nível → remove brinde definitivamente
+  if (!nivel){
+    codigosBrinde.forEach(c => delete carrinho[c]);
+  }
+
+  /* ============================================================
+       🔥 ATUALIZAÇÕES FINAIS
+     ============================================================ */
 
   // Atualiza total
   atualizarTotal();
@@ -1070,6 +1101,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
