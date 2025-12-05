@@ -464,13 +464,11 @@ function mostrarProdutos(marca) {
         <h4>${prod.descricao}</h4>
 
         ${precoTexto}
-
         <div class="qtd-container">
           <button onclick="cliqueRapido('${cod}',-1,false)">-</button>
-          <input id="qtd-${cod}" value="${carrinho[cod]?.qtd || 0}">
+          <input id="qtd-${cod}" type="text" value="${carrinho[cod]?.qtd || 0}" readonly>
           <button onclick="cliqueRapido('${cod}',1,false)">+</button>
         </div>
-
       </div>`;
   });
 }
@@ -535,10 +533,9 @@ function mostrarPromocoes(){
         <h4>${prod.descricao}</h4>
 
         ${precoTexto}
-
         <div class="qtd-container">
           <button onclick="cliqueRapido('${cod}', -1, false)">-</button>
-          <input id="qtd-${cod}" value="${carrinho[cod]?.qtd || 0}">
+          <input id="qtd-${cod}" type="text" value="${carrinho[cod]?.qtd || 0}" readonly>
           <button onclick="cliqueRapido('${cod}', 1, false)">+</button>
         </div>
       </div>`;
@@ -955,3 +952,4 @@ function exibirUltimoPedido() {
 function confirmarQtdManual() {
   document.getElementById("modalQtd").style.display = "none";
 }
+
