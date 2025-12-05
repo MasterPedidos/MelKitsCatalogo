@@ -722,33 +722,45 @@ function alterarQtd(cod, delta, dentroCarrinho=false){
   const un      = Number(prod.unidades) || 1;
 
   if (nova > 0){
-    carrinho[cod] = {...prod, valor:valorCx, unidades:un, qtd:nova};
+    carrinho[cod] = {
+      ...prod,
+      valor: valorCx,
+      unidades: un,
+      qtd: nova
+    };
   } else {
     delete carrinho[cod];
   }
 
+  // Atualizar input visual no catálogo e no carrinho
   const i1 = document.getElementById(`qtd-${cod}`);
   const i2 = document.getElementById(`qtd-carrinho-${cod}`);
   if (i1) i1.value = nova;
   if (i2) i2.value = nova;
 
+  // 🔥 recalcula o brinde progressivo da promo.json
+  aplicarBrindeProgressivo();
+
   atualizarTotal();
 }
 
-function cliqueRapido(cod, delta, dentro){
-  alterarQtd(cod, delta, dentro);
+function cliqueRapido(cod, delta, dentroCarrinho=false){
+  alterarQtd(cod, delta, dentroCarrinho);
 }
 
 function atualizarTotal(){
-  // Brinde já está com valor 0, então pode somar normal
   let total = 0;
+
   for (const c in carrinho){
     total += (Number(carrinho[c].valor) || 0) * (Number(carrinho[c].qtd) || 0);
   }
 
-  document.getElementById("total").textContent = "Total: R$ " + total.toFixed(2);
+  document.getElementById("total").textContent =
+    "Total: R$ " + total.toFixed(2);
+
   const t = document.getElementById("total-carrinho");
-  if (t) t.textContent = "Total: R$ " + total.toFixed(2);
+  if (t)
+    t.textContent = "Total: R$ " + total.toFixed(2);
 }
 
 /* ============================================================
@@ -772,35 +784,48 @@ function renderTelefone(){
     ? `<span>${telefoneDisplay}</span><button onclick="editarTelefone()">✏️ Editar</button>`
     : `<span style="color:#666;">Nenhum contato cadastrado</span> <button onclick="abrirPopup()">Cadastrar</button>`;
 }
-function abrirPopup(){document.getElementById("popup").style.display="flex";}
-function fecharPopup(){document.getElementById("popup").style.display="none";}
+
+function abrirPopup(){ document.getElementById("popup").style.display="flex"; }
+function fecharPopup(){ document.getElementById("popup").style.display="none"; }
+
 function salvarTelefone(){
   const inp = document.getElementById("telefone-input");
   const digits = inp.value.replace(/\D/g,"");
-  if (digits.length < 10){alert("Número inválido!");return;}
+
+  if (digits.length < 10){
+    alert("Número inválido!");
+    return;
+  }
 
   const ddd = digits.slice(0,2);
   const corpo = digits.slice(2);
+
   const exib = corpo.length === 8
     ? `(${ddd}) ${corpo.slice(0,4)}-${corpo.slice(4)}`
     : `(${ddd}) ${corpo.slice(0,5)}-${corpo.slice(5)}`;
 
   telefoneDigits  = digits;
   telefoneDisplay = exib;
-  localStorage.setItem("telefone_digits",digits);
-  localStorage.setItem("telefone_display",exib);
+
+  localStorage.setItem("telefone_digits", digits);
+  localStorage.setItem("telefone_display", exib);
+
   fecharPopup();
   renderTelefone();
 }
+
 function editarTelefone(){
   localStorage.removeItem("telefone_digits");
   localStorage.removeItem("telefone_display");
-  telefoneDigits=""; telefoneDisplay="";
+
+  telefoneDigits = "";
+  telefoneDisplay = "";
+
   abrirPopup();
 }
 
 document.addEventListener("DOMContentLoaded",()=>{
-  document.getElementById("btnSalvarContato").addEventListener("click",salvarTelefone);
+  document.getElementById("btnSalvarContato").addEventListener("click", salvarTelefone);
   renderTelefone();
   if (!telefoneDigits) abrirPopup();
 });
@@ -812,12 +837,13 @@ function enviarWhatsApp(){
     abrirPopup();
     return;
   }
+
   if (Object.keys(carrinho).length === 0){
     alert("Seu carrinho está vazio.");
     return;
   }
 
-  // Garante o brinde antes de montar a mensagem
+  // 🔥 garante brinde atualizado antes de enviar
   aplicarBrindeProgressivo();
 
   let total = 0;
@@ -827,10 +853,9 @@ function enviarWhatsApp(){
     const p = carrinho[cod];
     const valorCx = Number(p.valor) || 0;
     const un      = Number(p.unidades) || 1;
-    const valorUn = un ? valorCx/un : valorCx;
+    const valorUn = un ? valorCx / un : valorCx;
 
     if (p.brinde === true){
-      // Mensagem especial para brinde
       linhas.push(
         `Brinde: ${p.descricao}\n`+
         `Qtd: ${p.qtd}\n`+
@@ -862,6 +887,7 @@ function enviarWhatsApp(){
     total: total,
     telefoneDigits: telefoneDigits
   };
+
   localStorage.setItem(STORAGE_ULTIMO, JSON.stringify(ultimo));
 
   const url = `https://wa.me/55${telefoneDigits}?text=${encodeURIComponent(msg)}`;
@@ -871,16 +897,22 @@ function enviarWhatsApp(){
 /* --- ÚLTIMO PEDIDO --- */
 function exibirUltimoPedido(){
   const raw = localStorage.getItem(STORAGE_ULTIMO);
-  if (!raw){alert("Nenhum pedido anterior.");return;}
+  if (!raw){
+    alert("Nenhum pedido anterior.");
+    return;
+  }
 
-  try{
+  try {
     const ult = JSON.parse(raw);
-    if (!ult.itens){alert("Nenhum pedido anterior.");return;}
+    if (!ult.itens){
+      alert("Nenhum pedido anterior.");
+      return;
+    }
 
     carrinho = {};
     for (const c in ult.itens){
       const p = ult.itens[c];
-      carrinho[c] = {...p, qtd:Number(p.qtd)||0};
+      carrinho[c] = { ...p, qtd: Number(p.qtd) || 0 };
     }
 
     mostrarCarrinho();
@@ -889,161 +921,26 @@ function exibirUltimoPedido(){
     if (el){
       const dt = new Date(ult.data);
       if (!isNaN(dt.getTime())){
-        el.textContent = "Último pedido em: " +
-          dt.toLocaleString("pt-BR",{
-            day:"2-digit",month:"2-digit",year:"numeric",
-            hour:"2-digit",minute:"numeric"
+        el.textContent =
+          "Último pedido em: " +
+          dt.toLocaleString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "numeric"
           });
       }
     }
-  }catch{
+  }
+  catch {
     alert("Erro ao carregar último pedido.");
   }
-}
-
-  // soma total geral de caixas compradas
-  let soma = 0;
-  for (const cod in carrinho) {
-    if (!carrinho[cod].isBrinde) {
-      soma += carrinho[cod].qtd;
-    }
-  }
-
-  // descobre nível atingido
-  let nivelAtingido = null;
-  for (const n of niveisPromo) {
-    if (soma >= n.qtd) {
-      nivelAtingido = n;
-      break;
-    }
-  }
-
-  if (!nivelAtingido) {
-    ultimoBrindeAplicado = null;
-    return;
-  }
-
-  // descobre o produto brinde no catálogo
-  const prodBrinde = produtos.find(p => String(p.codigo) === String(nivelAtingido.brinde));
-
-  if (!prodBrinde) {
-    console.warn("Brinde não encontrado no catálogo:", nivelAtingido.brinde);
-    return;
-  }
-
-  // adiciona ao carrinho com preço zero
-  carrinho[prodBrinde.codigo] = {
-    ...prodBrinde,
-    qtd: 1,
-    valor: 0,
-    unidades: 1,
-    isBrinde: true
-  };
-
-  ultimoBrindeAplicado = prodBrinde.codigo;
-}
-
-function aplicarBrindeProgressivo() {
-
-  // remove brindes antigos antes de recalcular
-  for (const cod in carrinho) {
-    if (carrinho[cod].isBrinde === true) {
-      delete carrinho[cod];
-    }
-  }
-
-  // soma total geral de caixas compradas
-  let soma = 0;
-  for (const cod in carrinho) {
-    if (!carrinho[cod].isBrinde) {
-      soma += carrinho[cod].qtd;
-    }
-  }
-
-  // descobre nível atingido (maior)
-  let nivelAtingido = null;
-  for (const n of niveisPromo) {
-    if (soma >= n.qtd) {
-      nivelAtingido = n;
-      break;
-    }
-  }
-
-  if (!nivelAtingido) {
-    return;
-  }
-
-  // encontra o produto brinde no catálogo
-  const prodBrinde = produtos.find(
-    p => String(p.codigo) === String(nivelAtingido.brinde)
-  );
-
-  if (!prodBrinde) {
-    console.warn("Brinde não encontrado:", nivelAtingido.brinde);
-    return;
-  }
-
-  // adiciona brinde ao carrinho (1 unidade, preço 0)
-  carrinho[prodBrinde.codigo] = {
-    ...prodBrinde,
-    qtd: 1,
-    valor: 0,
-    unidades: 1,
-    isBrinde: true
-  };
-}
-
-/* ============================================================
-   ALTERAR QUANTIDADE + RECALCULAR BRINDE
-   ============================================================ */
-
-function alterarQtd(cod, delta, dentroCarrinho = false) {
-  const prod = produtos.find(p => String(p.codigo) === String(cod));
-  if (!prod) return;
-
-  const atual = carrinho[cod]?.qtd || 0;
-  let nova = atual + delta;
-
-  if (nova < 0) nova = 0;
-
-  const valorCx = Number(prod.valor) || 0;
-  const un = Number(prod.unidades) || 1;
-
-  if (nova > 0) {
-    carrinho[cod] = {
-      ...prod,
-      valor: valorCx,
-      unidades: un,
-      qtd: nova
-    };
-  } else {
-    delete carrinho[cod];
-  }
-
-  // atualizar inputs de quantidade
-  const i1 = document.getElementById(`qtd-${cod}`);
-  const i2 = document.getElementById(`qtd-carrinho-${cod}`);
-  if (i1) i1.value = nova;
-  if (i2) i2.value = nova;
-
-  // 🔥 recalcular brinde automaticamente
-  aplicarBrindeProgressivo();
-
-  atualizarTotal();
 }
 
 /* ============================================================
    MODAL DE QUANTIDADE MANUAL (opcional)
    ============================================================ */
-
 function confirmarQtdManual(){
   document.getElementById("modalQtd").style.display = "none";
 }
-   
-</script>
-</body>
-</html>
-
-
-
-
