@@ -800,6 +800,9 @@ function alterarQtd(cod, delta, dentroCarrinho=false){
   const prod = produtos.find(p => String(p.codigo) === String(cod));
   if (!prod) return;
 
+  // 🔥 Qualquer alteração desativa o modo “último pedido”
+  carregandoUltimoPedido = false;
+
   // Sempre pega número real, nunca string
   const atual = Number(carrinho[cod]?.qtd) || 0;
 
@@ -828,14 +831,13 @@ function alterarQtd(cod, delta, dentroCarrinho=false){
   if (i1) i1.value = nova;
   if (i2) i2.value = nova;
 
-  // Recalcula a progressiva com quantidade correta
+  // 🔥 Atualiza progressiva agora SEM restrição
   aplicarBrindeProgressivo();
 
   // Atualiza total
   atualizarTotal();
 
-  // 🔥 NOVO: se estiver dentro do carrinho, redesenha a tela inteira
-  // Isso garante que o brinde apareça ou desapareça imediatamente
+  // Se estiver no carrinho → redesenha tela
   if (dentroCarrinho === true) {
     mostrarCarrinho();
   }
@@ -1030,6 +1032,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
