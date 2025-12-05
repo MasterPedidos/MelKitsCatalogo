@@ -901,29 +901,6 @@ function exibirUltimoPedido(){
   }
 }
 
-/* ============================================================
-   🔥 ENGINE DE PROMOÇÃO PROGRESSIVA POR NÍVEIS (10 / 20 / 30 / 40)
-   ============================================================ */
-
-const niveisPromo = [
-  { qtd: 40, brinde: "1001" },
-  { qtd: 30, brinde: "450" },
-  { qtd: 20, brinde: "712" },
-  { qtd: 10, brinde: "899" },
-];
-
-// usado para evitar duplicações de brindes
-let ultimoBrindeAplicado = null;
-
-function aplicarBrindeProgressivo() {
-
-  // remove brindes antigos antes de recalcular
-  for (const cod in carrinho) {
-    if (carrinho[cod].isBrinde) {
-      delete carrinho[cod];
-    }
-  }
-
   // soma total geral de caixas compradas
   let soma = 0;
   for (const cod in carrinho) {
@@ -1001,4 +978,5 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
