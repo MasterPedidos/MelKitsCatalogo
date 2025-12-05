@@ -758,31 +758,38 @@ function alterarQtd(cod, delta, dentroCarrinho=false){
   const prod = produtos.find(p => String(p.codigo) === String(cod));
   if (!prod) return;
 
-  const atual = carrinho[cod]?.qtd || 0;
-  let nova = atual + delta;
+  // Sempre pega número real, nunca string
+  const atual = Number(carrinho[cod]?.qtd) || 0;
+
+  // Quantidade nova
+  let nova = Number(atual + delta);
   if (nova < 0) nova = 0;
 
   const valorCx = Number(prod.valor) || 0;
   const un      = Number(prod.unidades) || 1;
 
+  // Atualizar carrinho
   if (nova > 0){
     carrinho[cod] = {
       ...prod,
       valor: valorCx,
       unidades: un,
-      qtd: Number(nova) || 0   // força número sempre correto
+      qtd: nova   // 🔥 aqui já está garantido que é número verdadeiro
     };
   } else {
     delete carrinho[cod];
   }
 
+  // Atualiza os inputs visuais
   const i1 = document.getElementById(`qtd-${cod}`);
   const i2 = document.getElementById(`qtd-carrinho-${cod}`);
   if (i1) i1.value = nova;
   if (i2) i2.value = nova;
 
-  // Recalcula brinde sempre que mexer em quantidade
+  // Recalcula a progressiva com a quantidade correta
   aplicarBrindeProgressivo();
+
+  // Atualiza totais e UI
   atualizarTotal();
 }
 
@@ -959,6 +966,7 @@ function confirmarQtdManual(){
 </script>
 </body>
 </html>
+
 
 
 
